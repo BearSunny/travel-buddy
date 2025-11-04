@@ -5,7 +5,6 @@ const GOOGLE_MAPS_BASE_URL = 'https://maps.googleapis.com/maps/api';
 
 const googleMapsClient = axios.create({
   baseURL: GOOGLE_MAPS_BASE_URL,
-  timeout: 10000
 });
 
 export const getPlaceDetails = async (placeId) => {

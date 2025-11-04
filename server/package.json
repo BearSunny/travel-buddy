@@ -18,15 +18,11 @@
   "dependencies": {
     "axios": "^1.13.1",
     "cors": "^2.8.5",
-<<<<<<< HEAD
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
     "express-jwt": "^8.5.1",
-    "jwks-rsa": "^3.2.0"
-=======
+    "jwks-rsa": "^3.2.0",
     "express": "^5.1.0",
     "pg": "^8.16.3"
->>>>>>> 7738dfb964cf9d3f3742c9223c06a6ba9b2bb915
   },
   "devDependencies": {
     "jest": "^30.2.0",

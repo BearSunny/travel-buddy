@@ -20,7 +20,7 @@ export const useMapsService = () => {
     console.log('Making request to base URL: ', apiClient.defaults.baseURL);
     console.log('Full URL will be: ', `${apiClient.defaults.baseURL}/google-maps/nearby`);
     
-    const response = await apiClient.get('/api/google-maps/search', {
+    const response = await apiClient.get('/google-maps/search', {
       params: { query, location, radius }
     });
     return response.data;
@@ -29,7 +29,7 @@ export const useMapsService = () => {
   const getNearbyPlaces = async (latitude, longitude, type = 'restaurant', radius = 5000) => {
     if (!apiClient) throw new Error('Not authenticated');
     
-    const response = await apiClient.get('/api/google-maps/nearby', {
+    const response = await apiClient.get('/google-maps/nearby', {
       params: { latitude, longitude, type, radius }
     });
     return response.data;
@@ -38,14 +38,14 @@ export const useMapsService = () => {
   const getPlaceDetails = async (placeId) => {
     if (!apiClient) throw new Error('Not authenticated');
     
-    const response = await apiClient.get(`/api/google-maps/place/${placeId}`);
+    const response = await apiClient.get(`/google-maps/place/${placeId}`);
     return response.data;
   };
 
   const reverseGeocode = async (latitude, longitude) => {
     if (!apiClient) throw new Error('Not authenticated');
     
-    const response = await apiClient.get('/api/google-maps/geocode', {
+    const response = await apiClient.get('/google-maps/geocode', {
       params: { latitude, longitude }
     });
     return response.data;
