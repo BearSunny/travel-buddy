@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
-import Map from '../components/map/Map';
 import '../styles/landing.css';
+import LeafletMap from '../components/map/LeafletMap';
 
 const LandingPage = () => {
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
@@ -56,7 +56,7 @@ const LandingPage = () => {
         </header>
         
         <main className="app-main">
-          <Map 
+          <LeafletMap 
             searchResults={searchResults}
             setSearchResults={setSearchResults}
             selectedPlace={selectedPlace}

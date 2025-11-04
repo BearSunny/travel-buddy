@@ -1,39 +1,27 @@
-import React, { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Auth0Provider } from '@auth0/auth0-react';
+import LandingPage from './pages/LandingPage';
 import './App.css';
-import Map from './components/map/Map';
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
 
 function App() {
-  const { user, logout } = useAuth0();
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedPlace, setSelectedPlace] = useState(null);
-
   return (
-    <div className="App">
-      <header className="app-header">
-        <h1>Travel Map App</h1>
-        {user && (
-          <div className="header-user">
-            <img src={user.picture} alt={user.name} className="user-avatar" />
-            <span>{user.name}</span>
-            <button 
-              onClick={() => logout({ returnTo: window.location.origin })}
-              className="logout-btn"
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </header>
-      <main className="app-main">
-        <Map 
-          searchResults={searchResults}
-          setSearchResults={setSearchResults}
-          selectedPlace={selectedPlace}
-          setSelectedPlace={setSelectedPlace}
-        />
-      </main>
-    </div>
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      authorizationParams={{
+        redirectUri: window.location.origin
+      }}
+    >
+      <BrowserRouter>
+        <div className="App">
+          <LandingPage />
+        </div>
+      </BrowserRouter>
+    </Auth0Provider>
   );
 }
 

@@ -47,6 +47,17 @@
 }
 
 .app-main {
-  flex: 1;
-  overflow: hidden;
+  height: calc(100vh - 80px); /* Adjust based on header height */
+  width: 100%;
+}
+
+/* Leaflet popup styles */
+.leaflet-popup-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.leaflet-popup-content p {
+  margin: 5px 0;
+  font-size: 14px;
 }
