@@ -85,3 +85,10 @@ docker-compose restart client
 docker-compose restart server
 ```
 
+### Working with database
+**If cannot run database, try**
+```bash
+docker-compose exec db psql -U postgres -d travelbuddy
+
+\i /docker-entrypoint-initdb.d/init.sql
+```

@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import pool from '../db.js';
+
 const router = express.Router();
-const pool = require('../db');
 
 router.post('/', async (req, res) => {
   try {
@@ -19,4 +20,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

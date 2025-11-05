@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import pool from '../db.js';
+
 const router = express.Router();
-const pool = require('../db');
 
 router.post('/', async (req, res) => {
   try {
@@ -22,11 +23,11 @@ router.post('/', async (req, res) => {
       }
     }
 
-    if (role != 'viewer' && role != 'editor' && role != 'admin') {
+    if (role !== 'viewer' && role !== 'editor' && role !== 'admin') {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
-    if (status != 'invited' && status != 'accepted' && status != 'declined') {
+    if (status !== 'invited' && status !== 'accepted' && status !== 'declined') {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
@@ -48,4 +49,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

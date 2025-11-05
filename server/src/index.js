@@ -4,8 +4,11 @@ import dotenv from 'dotenv';
 import { PORT } from './config/environment.js';
 import errorHandler from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
-import mapsRoutes from './routes/maps.js';
 import healthRoutes from './routes/health.js';
+import usersRoutes from './routes/users.js';
+import tripsRoutes from './routes/trips.js';
+import tripCollaboratorsRoutes from './routes/trip_collaborators.js';
+import tripEventsRoutes from './routes/trip_events.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -15,37 +18,15 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api/users', require('./routes/users'));
-app.use('/api/trips', require('./routes/trips'));
-app.use('/api/trip_collaborators', require('./routes/trip_collaborators'));
-app.use('/api/trip_events', require('./routes/trip_events'));
-
-// Health check endpoint with database test
-app.get('/google-maps/health', async (req, res) => {
-  try {
-    // Test database connection
-    await pool.query('SELECT NOW()');
-    res.json({ 
-      message: 'Server is running', 
-      timestamp: new Date(),
-      database: 'connected'
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      message: 'Server is running but database connection failed', 
-      timestamp: new Date(),
-      database: 'disconnected',
-      error: error.message
-    });
-  }
-});
+app.use('/api/users', usersRoutes);
+app.use('/api/trips', tripsRoutes);
+app.use('/api/trip_collaborators', tripCollaboratorsRoutes);
+app.use('/api/trip_events', tripEventsRoutes);
 
 // API Routes
-app.use('/google-maps', healthRoutes);
-app.use('/google-maps', mapsRoutes);
+app.use('/health', healthRoutes);
 
-// Database example route (for future use)
-app.get("/google-maps/places", async (req, res) => {
+app.get("/api/places", async (req, res) => {
   try {
     const result = await pool.query("SELECT name FROM places");
     res.json(result.rows);
@@ -55,22 +36,25 @@ app.get("/google-maps/places", async (req, res) => {
   }
 });
 
-app.get('/debug/tables', async (req,res) => {
-  const result1 = await pool.query("SELECT * FROM users;");
-  const result2 = await pool.query("SELECT * FROM trips;");
-  const result3 = await pool.query("SELECT * FROM trip_collaborators;");
-  const result4 = await pool.query("SELECT * FROM trip_events;");
-  res.json({
-    users: result1.rows,
-    trips: result2.rows,
-    trip_collaborators: result3.rows,
-    trip_events: result4.rows
-  });
+app.get('/debug/tables', async (req, res) => {
+  try {
+    const result1 = await pool.query("SELECT * FROM users;");
+    const result2 = await pool.query("SELECT * FROM trips;");
+    const result3 = await pool.query("SELECT * FROM trip_collaborators;");
+    const result4 = await pool.query("SELECT * FROM trip_events;");
+    res.json({
+      users: result1.rows,
+      trips: result2.rows,
+      trip_collaborators: result3.rows,
+      trip_events: result4.rows
+    });
+  } catch (err) {
+    console.error("Debug tables error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-// Error handling middleware (must be last)
+// Error handler middleware (should be last)
 app.use(errorHandler);
 
 // Start server
