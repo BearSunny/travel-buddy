@@ -5,6 +5,10 @@ import { PORT } from './config/environment.js';
 import errorHandler from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import healthRoutes from './routes/health.js';
+import usersRoutes from './routes/users.js';
+import tripsRoutes from './routes/trips.js';
+import tripCollaboratorsRoutes from './routes/trip_collaborators.js';
+import tripEventsRoutes from './routes/trip_events.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -14,8 +18,43 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/users', usersRoutes);
+app.use('/api/trips', tripsRoutes);
+app.use('/api/trip_collaborators', tripCollaboratorsRoutes);
+app.use('/api/trip_events', tripEventsRoutes);
 
-// Error handling middleware (must be last)
+// API Routes
+app.use('/health', healthRoutes);
+
+app.get("/api/places", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT name FROM places");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.get('/debug/tables', async (req, res) => {
+  try {
+    const result1 = await pool.query("SELECT * FROM users;");
+    const result2 = await pool.query("SELECT * FROM trips;");
+    const result3 = await pool.query("SELECT * FROM trip_collaborators;");
+    const result4 = await pool.query("SELECT * FROM trip_events;");
+    res.json({
+      users: result1.rows,
+      trips: result2.rows,
+      trip_collaborators: result3.rows,
+      trip_events: result4.rows
+    });
+  } catch (err) {
+    console.error("Debug tables error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// Error handler middleware (should be last)
 app.use(errorHandler);
 
 // Start server
