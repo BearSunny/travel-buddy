@@ -6,6 +6,7 @@ import './App.css';
 
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+const audience = process.env.REAC_APP_AUTH0_AUDIENCE;
 
 function App() {
   return (
@@ -13,7 +14,11 @@ function App() {
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirectUri: window.location.origin
+        redirectUri: window.location.origin,
+        audience: audience,
+        scope: "openid profile email",
+        response_type: "code",
+        response_mode: "query"
       }}
     >
       <BrowserRouter>

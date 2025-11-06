@@ -3,15 +3,16 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    display_name VARCHAR(255) NOT NULL
+    auth0_id TEXT UNIQUE,
+    display_name VARCHAR(255) NOT NULL,
+    picture TEXT
 );
 
-INSERT INTO users (email, password, display_name)
-VALUES ('lechihungdo@gmail.com', '123456789', 'Lê Chí Hưng');
+INSERT INTO users (email, auth0_id, display_name)
+VALUES ('lechihungdo@gmail.com', 'auth0|65b1d3f4d6e5c12abc123456', 'Lê Chí Hưng');
 
-INSERT INTO users (email, password, display_name)
-VALUES ('huynhtanphuc@gmail.com', '987654321', 'Huỳnh Tấn Phúc');
+INSERT INTO users (email, auth0_id, display_name)
+VALUES ('huynhtanphuc@gmail.com', 'auth0|65b1d5f4d6e5c13ghz56789', 'Huỳnh Tấn Phúc');
 
 CREATE TABLE trips (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

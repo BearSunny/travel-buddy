@@ -21,7 +21,7 @@ docker-compose up
 
 3. **Access the application**
    - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+   - Backend API: http://localhost:5001
 
 4. **Stop the application**
 ```bash
