@@ -166,19 +166,19 @@ CREATE TABLE trip_events (
 - Insert new user into table users: http://localhost:5001/api/users/create
 - Read row from table users with the corresponding id: http://localhost:5001/api/users/read
 - Update the row in table users with the corresponding id: http://localhost:5001/api/users/update
-- Delete the row in table users with the corresponding id: http://localhost:5001/api/users/update
+- Delete the row in table users with the corresponding id: http://localhost:5001/api/users/delete
 3. trips methods:
 - Insert new user into table trips: http://localhost:5001/api/trips/create
 - Read row from table trips with the corresponding id: http://localhost:5001/api/trips/read
 - Update the row in table trips with the corresponding id: http://localhost:5001/api/trips/update
-- Delete the row in table trips with the corresponding id: http://localhost:5001/api/trips/update
+- Delete the row in table trips with the corresponding id: http://localhost:5001/api/trips/delete
 4. trip_collaborators methods:
 - Insert new user into table trip_collabortors: http://localhost:5001/api/trip_collabortors/create
 - Read row from table trip_collabortors with the corresponding id: http://localhost:5001/api/trip_collabortors/read
 - Update the row in table trip_collabortors with the corresponding id: http://localhost:5001/api/trip_collabortors/update
-- Delete the row in table trip_collabortors with the corresponding id: http://localhost:5001/api/trip_collabortors/update
+- Delete the row in table trip_collabortors with the corresponding id: http://localhost:5001/api/trip_collabortors/delete
 5. trip_events methods:
 - Insert new user into table trip_events: http://localhost:5001/api/trip_events/create
 - Read row from table trip_events with the corresponding id: http://localhost:5001/api/trip_events/read
 - Update the row in table trip_events with the corresponding id: http://localhost:5001/api/trip_events/update
-- Delete the row in table trip_events with the corresponding id: http://localhost:5001/api/trip_events/update
+- Delete the row in table trip_events with the corresponding id: http://localhost:5001/api/trip_events/delete
