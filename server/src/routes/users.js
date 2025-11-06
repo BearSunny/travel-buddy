@@ -5,13 +5,13 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { email, password, display_name } = req.body;
+    const { auth0_id, email, password, display_name, avatar, update_at } = req.body;
     if (!email || !password || !display_name) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    const q = 'INSERT INTO users (email, password, display_name) VALUES ($1, $2, $3) RETURNING id, email, display_name;';
-    const { rows } = await pool.query(q, [email, password, display_name]);
+    const q = 'INSERT INTO users (auth0_id, email, password, display_name, avatar, update_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, auth0_id, password, email, display_name, avatar, update_at;';
+    const { rows } = await pool.query(q, [auth0_id, email, password, display_name, avatar, update_at]);
     return res.status(201).json(rows[0]);
   } catch (err) {
     if (err && err.code === '23505') return res.status(409).json({ error: 'Email already exists' });
