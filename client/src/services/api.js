@@ -49,7 +49,7 @@ export const createApiClient = (getAccessTokenSilently) => {
 
 export const testConnection = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/health');
+    const response = await axios.get('http://localhost:5001/api/health');
     console.log('Backend connection successful:', response.data);
     return response.data;
   } catch (error) {

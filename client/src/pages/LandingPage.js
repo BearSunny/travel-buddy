@@ -3,9 +3,11 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 import '../styles/landing.css';
 import LeafletMap from '../components/map/LeafletMap';
+import useUserSync from '../hooks/useAuth';
 
 const LandingPage = () => {
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
+  const { syncStatus } = useUserSync();
   const [searchResults, setSearchResults] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
 
@@ -24,6 +26,15 @@ const LandingPage = () => {
       </div>
     );
   }
+
+  const getSyncStatusMessage = () => {
+    switch(syncStatus) {
+      case 'syncing': return '🔄 Syncing user data...';
+      case 'success': return '✅ User synced successfully!';
+      case 'error': return '❌ Sync failed - check console';
+      default: return '⏳ Ready to sync...';
+    }
+  };
 
   if (isAuthenticated) {
     // Authenticated user view - show map interface

@@ -9,6 +9,7 @@ import usersRoutes from './routes/users.js';
 import tripsRoutes from './routes/trips.js';
 import tripCollaboratorsRoutes from './routes/trip_collaborators.js';
 import tripEventsRoutes from './routes/trip_events.js';
+import authRoutes from './routes/authRoutes.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -18,6 +19,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/trip_collaborators', tripCollaboratorsRoutes);
@@ -26,6 +28,7 @@ app.use('/api/trip_events', tripEventsRoutes);
 // API Routes
 app.use('/health', healthRoutes);
 
+/*
 app.get("/api/places", async (req, res) => {
   try {
     const result = await pool.query("SELECT name FROM places");
@@ -53,11 +56,18 @@ app.get('/debug/tables', async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
+*/
 
-// Error handler middleware (should be last)
+// Error handler middleware 
 app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
+  logger.info('Available routes:');
+  logger.info('  POST /api/auth/sync - Sync Auth0 user to database');
+  logger.info('  GET  /api/auth/me - Get current user');
+  logger.info('  GET  /api/users - Get all users');
+  logger.info('  GET  /api/users/:id - Get user by ID');
+  logger.info('  PUT  /api/users/profile - Update user profile');
 });
