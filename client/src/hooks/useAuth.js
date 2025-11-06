@@ -27,7 +27,7 @@ const useUserSync = () => {
               auth0_id: user.sub,
               email: user.email,
               display_name: user.name,
-              picture: user.picture
+              avatar: user.picture
             })
           });
 
