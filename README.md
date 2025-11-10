@@ -110,8 +110,10 @@ CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     auth0_id TEXT,
     email VARCHAR(255) NOT NULL UNIQUE,
-    display_name VARCHAR(255) NOT NULL,
-    picture TEXT
+    password VARCHAR(255),
+    display_name VARCHAR(255),
+    avatar TEXT,
+    updated_at DATE
 );
 ```
 2. trips
