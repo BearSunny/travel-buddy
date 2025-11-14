@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PORT } from './config/environment.js';
 import errorHandler from './middleware/errorHandler.js';
+import { handleJwtError } from './middleware/auth.js';
 import logger from './utils/logger.js';
 import healthRoutes from './routes/health.js';
 import usersRoutes from './routes/users.js';
@@ -58,12 +59,14 @@ app.get('/debug/tables', async (req, res) => {
 });
 */
 
+app.use(handleJwtError);
+
 // Error handler middleware 
 app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
+  logger.info('Server running on port ${PORT}');
   logger.info('Available routes:');
   logger.info('  POST /api/auth/sync - Sync Auth0 user to database');
   logger.info('  GET  /api/auth/me - Get current user');
