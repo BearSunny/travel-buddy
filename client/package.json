@@ -9,11 +9,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@auth0/nextjs-auth0": "^4.11.1",
+    "@types/leaflet": "^1.9.21",
     "auth0": "^4.35.0",
+    "leaflet": "^1.9.4",
+    "leaflet-control-geocoder": "^3.3.1",
     "next": "^16.0.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
+    "save": "^2.9.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
