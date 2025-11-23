@@ -38,6 +38,7 @@ app.get("/api/places", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
+*/
 
 app.get('/debug/tables', async (req, res) => {
   try {
@@ -56,7 +57,6 @@ app.get('/debug/tables', async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-*/
 
 // Error handler middleware 
 app.use(errorHandler);
