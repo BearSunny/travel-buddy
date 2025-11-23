@@ -4,17 +4,18 @@ CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     auth0_id TEXT,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255),
     display_name VARCHAR(255),
     avatar TEXT,
-    updated_at DATE
+    updated_at TIMESTAMPTZ
 );
 
+/*
 INSERT INTO users (email, password, display_name)
 VALUES ('lechihungdo@gmail.com', '123456789', 'Lê Chí Hưng');
 
 INSERT INTO users (email, password, display_name)
 VALUES ('huynhtanphuc@gmail.com', '987654321', 'Huỳnh Tấn Phúc');
+*/
 
 CREATE TABLE trips (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,6 +30,7 @@ CREATE TABLE trips (
 INSERT INTO trips (owner_id, title, description, start_date, end_date)
 VALUES (
     (SELECT id FROM users WHERE email = 'lechihungdo@gmail.com'),
+    '12345678',
     'Hành trình Hội An',
     'Khám phá phổ cổ',
     '2025-11-15',
