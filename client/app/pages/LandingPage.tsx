@@ -1,5 +1,5 @@
 
-import LoginButton from "@/components/LoginButton";
+import LoginButton from "@/components/NavBar/LoginButton";
 
 export default function LandingPage() {
   return (
