@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
+import { CollaborationProvider } from "@/context/CollaborationContext";
 import "./styles/globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Auth0Provider>
-          {children}
+          <CollaborationProvider>
+            {children}
+          </CollaborationProvider>
         </Auth0Provider>
       </body>
     </html>

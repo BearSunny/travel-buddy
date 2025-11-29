@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
 import { PORT } from './config/environment.js';
 import errorHandler from './middleware/errorHandler.js';
 import { handleJwtError } from './middleware/auth.js';
@@ -12,10 +13,35 @@ import tripCollaboratorsRoutes from './routes/trip_collaborators.js';
 import tripEventsRoutes from './routes/trip_events.js';
 import authRoutes from './routes/authRoutes.js';
 import pool from './db.js';
+import { setupCollaborationWS } from './ws/collaboration.js';
 
 dotenv.config();
 
 const app = express();
+
+// Create HTTP server and attach WebSocket
+const server = http.createServer(app);
+setupCollaborationWS(server);
+
+server.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
+  logger.info('Available routes:');
+  logger.info('  POST /api/auth/sync - Sync Auth0 user to database');
+  logger.info('  GET  /api/auth/me - Get current user');
+  logger.info('  GET  /api/users - Get all users');
+  logger.info('  GET  /api/users/:id - Get user by ID');
+  logger.info('  PUT  /api/users/profile - Update user profile');
+  logger.info('  WebSocket /collab - Collaboration rooms');
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, closing server gracefully');
+  server.close(() => {
+    logger.info('Server closed');
+    process.exit(0);
+  });
+});
 
 // Middleware
 app.use(cors());
@@ -64,13 +90,3 @@ app.use(handleJwtError);
 // Error handler middleware 
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  logger.info('Server running on port ${PORT}');
-  logger.info('Available routes:');
-  logger.info('  POST /api/auth/sync - Sync Auth0 user to database');
-  logger.info('  GET  /api/auth/me - Get current user');
-  logger.info('  GET  /api/users - Get all users');
-  logger.info('  GET  /api/users/:id - Get user by ID');
-  logger.info('  PUT  /api/users/profile - Update user profile');
-});

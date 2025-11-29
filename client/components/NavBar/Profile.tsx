@@ -14,11 +14,11 @@ export default function Profile() {
         <img
           src={picture}
           alt={user.name || "User profile"}
-          className="h-12 rounded-full shrink-0"
+          className="h-10 rounded-full shrink-0"
         />
       )}
       <div>
-        <h2 className="text-xl font-semibold">{user.name}</h2>
+        <h2 className="text-l font-semibold">{user.name}</h2>
         <p className="text-gray-500">{user.email}</p>
       </div>
     </div>
