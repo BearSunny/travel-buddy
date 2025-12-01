@@ -43,14 +43,19 @@ router.get('/read/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const q = 'SELECT * FROM trips WHERE id = $1'
+    const q = 'SELECT * FROM trips WHERE id = $1';
     const values = [id];
-    const { rows } = await pool.query(q, values);
+    const result1 = await pool.query(q, values);
 
-    if (rows.length === 0)
+    if (result1.rows.length === 0)
       return res.status(404).json({ error : 'Trip not found' });
 
-    return res.status(200).json(rows[0]);
+    const result2 = await pool.query('SELECT id FROM trip_events WHERE trip_id = $1', values);
+
+    return res.status(200).json({
+      trip: result1.rows[0],
+      trip_events: result2.rows
+    });
   } catch(err) {
     console.error('trips GET /:id error:', err);
     return res.status(500).json({ error: 'Internal server error' });
