@@ -13,7 +13,7 @@ import { LatLngExpression, LatLngTuple } from "leaflet";
 import { fixLeafletIcons } from "@/lib/FixLeafletIcons";
 import { useEffect, useState } from "react";
 import LeafletGeocoder from "./LeafletGeocoder";
-import CoffeeFinder from "../CoffeeFinder";
+import CoffeeFinder from "./CoffeeFinder";
 
 // --- Types ---
 interface LocationState {
