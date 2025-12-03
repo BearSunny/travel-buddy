@@ -21,16 +21,24 @@ router.get('/', checkJwt, async (req, res) => {
 router.get('/:id', checkJwt, async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(
-      'SELECT id, email, display_name, created_at FROM users WHERE id = $1',
+    const result1 = await pool.query(
+      'SELECT id, auth0_id, email, password, display_name, avatar, updated_at FROM users WHERE id = $1',
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (result1.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(result.rows[0]);
+    const result2 = await pool.query(
+      'SELECT id FROM trips where owner_id = $1',
+      [id]
+    );
+
+    return res.status(200).json({
+      user: result1.rows[0],
+      trips: result2.rows
+    });
   } catch (err) {
     console.error('Get user error:', err);
     res.status(500).json({ error: 'Internal server error' });
