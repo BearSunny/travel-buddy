@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
+import { UserProvider } from "@/context/userContext";
 import { CollaborationProvider } from "@/context/CollaborationContext";
 import "./styles/globals.css";
 
@@ -17,9 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Auth0Provider>
-          <CollaborationProvider>
-            {children}
-          </CollaborationProvider>
+          <UserProvider>
+            <CollaborationProvider>{children}</CollaborationProvider>
+          </UserProvider>
         </Auth0Provider>
       </body>
     </html>
