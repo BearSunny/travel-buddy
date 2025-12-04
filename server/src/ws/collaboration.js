@@ -1,4 +1,5 @@
 import { WebSocketServer } from 'ws';
+import * as WebSocket from 'ws';
 import logger from '../utils/logger.js';
 
 // Map to store rooms: roomId -> Set<{ws, userId}>

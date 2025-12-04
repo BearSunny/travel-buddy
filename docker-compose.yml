@@ -8,8 +8,6 @@ services:
       - /app/node_modules
     environment:
       - PORT=5001
-      - AUTH0_DOMAIN=dev-h17a67evq34e5a57.us.auth0.com
-      - AUTH0_AUDIENCE=https://travel-app-api
       - DB_HOST=db
       - DB_USER=postgres
       - DB_PASSWORD=postgres

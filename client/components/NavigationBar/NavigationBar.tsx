@@ -1,5 +1,5 @@
-import LogoutButton from "@/components/NavBar/LogoutButton";
-import Profile from "@/components/NavBar/Profile";
+import LogoutButton from "@/components/NavigationBar/LogoutButton";
+import Profile from "@/components/NavigationBar/Profile";
 import "@/app/styles/globals.css";
 
 export default function NaviagationBar() {
