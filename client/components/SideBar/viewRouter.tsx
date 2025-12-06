@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import ObjectView from "./view/ObjectView";
 import CalendarView from "./view/CalendarView";
+import { Trip } from "@/interface/Trip";
 
 type ViewType = "destinations" | "calendar";
 
