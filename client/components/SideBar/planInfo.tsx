@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCollaborationContext } from "@/context/CollaborationContext";
 import { getColorForUser, getAnimalForUser } from "@/utils/avatarGenerator";
 import { Icons } from "../ui/Icons";
@@ -151,100 +151,3 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
     </div>
   );
 }
-
-// "use client";
-
-// import React, { useState } from "react";
-// import { useCollaborationContext } from "@/context/CollaborationContext";
-// import { getColorForUser, getAnimalForUser } from "@/utils/avatarGenerator";
-// import { Trip } from "@/interface/Trip";
-
-// interface PlanInfoProps {
-//   trip: Trip;
-//   onBack: () => void;
-// }
-
-// export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
-//   const { roomId, userId, users, isConnected, generateShareLink } = useCollaborationContext();
-//   const [copied, setCopied] = useState(false);
-
-//   const handleShare = () => {
-//     const shareLink = generateShareLink();
-//     if (shareLink) {
-//       navigator.clipboard.writeText(shareLink);
-//       setCopied(true);
-//       setTimeout(() => setCopied(false), 2000);
-//     }
-//   };
-
-//   // Safe formatting for dates
-// const formatDate = (d: Date | string) => {
-//   const date = new Date(d);
-//   return isNaN(date.getTime()) ? "N/A" : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
-// };
-
-//   const userCount = users.size;
-//   const otherUsers = Array.from(users.entries()).filter(([id]) => id !== userId);
-
-//   return (
-//     <div className="flex flex-col gap-4 pb-4 border-b border-gray-200">
-//       {/* Back Button & Title */}
-//       <div className="flex items-start gap-2">
-//         <button
-//           onClick={onBack}
-//           className="mt-1 p-1 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
-//           title="Back to all plans"
-//         >
-//           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-//         </button>
-
-//         <div className="flex-1">
-//           <div className="flex justify-between items-start">
-//              <h1 className="text-xl font-extrabold text-black tracking-tight leading-tight mb-1">{trip.title}</h1>
-//               {/* Share Button */}
-//             <button
-//               onClick={handleShare}
-//               className="flex-shrink-0 flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded text-xs font-semibold transition-colors"
-//             >
-//               {copied ? "Copied" : "Share"}
-//             </button>
-//           </div>
-
-//           <div className="flex items-center gap-2 text-xs text-gray-500">
-//              <span>{formatDate(trip.start_date)} - {formatDate(trip.end_date)}</span>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Description */}
-//       {trip.description && (
-//         <p className="text-xs text-gray-600 line-clamp-2">{trip.description}</p>
-//       )}
-
-//       {/* Users / Connection Status */}
-//       <div className="flex items-center justify-between pt-2">
-//         <div className="flex items-center -space-x-1">
-//             {otherUsers.slice(0, 3).map(([id, user]) => (
-//                 <div key={id} className={`w-6 h-6 rounded-full ${getColorForUser(id)} text-white flex items-center justify-center text-[10px] ring-2 ring-white`}>
-//                   {getAnimalForUser(id)}
-//                 </div>
-//             ))}
-//             {/* Placeholder for current user or add button */}
-//              <button className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xs hover:bg-gray-200 ring-2 ring-white">
-//                 +
-//              </button>
-//         </div>
-
-//         {isConnected && (
-//             <div className="flex items-center gap-1.5">
-//                 <span className="relative flex h-2 w-2">
-//                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-//                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-//                 </span>
-//                 <span className="text-[10px] text-gray-500 font-medium">Live</span>
-//             </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }

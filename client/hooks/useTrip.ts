@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDbUser } from "@/context/userContext";
 import { Trip } from "@/interface/Trip";
 
@@ -21,16 +21,17 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useTrip() {
   const { user } = useDbUser();
-  const apiUrl = process.env.APP_API_URL || 'http://localhost:5001';
+  const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
 
-  const { data: userData, error, isLoading: isUserLoading, mutate } = useSWR(
-    user ? `${apiUrl}/api/users/${user.id}` : null,
-    fetcher,
-    {
-      refreshInterval: 300000,
-      dedupingInterval: 2000,
-    }
-  );
+  const {
+    data: userData,
+    error,
+    isLoading: isUserLoading,
+    mutate,
+  } = useSWR(user ? `${apiUrl}/api/users/${user.id}` : null, fetcher, {
+    refreshInterval: 300000,
+    dedupingInterval: 2000,
+  });
 
   const [fullTrips, setFullTrips] = useState<Trip[]>([]);
   const [isTripsLoading, setIsTripsLoading] = useState(false);
@@ -43,9 +44,10 @@ export function useTrip() {
       }
 
       setIsTripsLoading(true);
+      console.log(userData);
       try {
         const promises = userData.trips.map(async (t: any) => {
-          const tripId = t.id || t.trip_id; 
+          const tripId = t.id || t.trip_id;
           const res = await fetch(`${apiUrl}/api/trips/read/${tripId}`);
           return res.json();
         });
@@ -58,14 +60,13 @@ export function useTrip() {
               const { trip, trip_events } = res[0];
               return {
                 ...trip,
-                trip_id: trip.id, 
+                trip_id: trip.id,
                 events: trip_events || [],
               };
             }
             return null;
           })
-          .filter((t): t is Trip => t !== null); // Remove any failed fetches
-
+          .filter((t): t is Trip => t !== null);
         setFullTrips(formattedTrips);
       } catch (err) {
         console.error("Error fetching detailed trips:", err);
@@ -92,7 +93,7 @@ export function useTrip() {
         const err = await response.json();
         throw new Error(err.error || "Failed to create");
       }
-      await mutate(); 
+      await mutate();
       return await response.json();
     } catch (err) {
       console.error(err);
@@ -100,7 +101,10 @@ export function useTrip() {
     }
   };
 
-  const updateTrip = async (tripId: number | string, updates: UpdateTripData) => {
+  const updateTrip = async (
+    tripId: number | string,
+    updates: UpdateTripData
+  ) => {
     try {
       const response = await fetch(`${apiUrl}/api/trips/update/${tripId}`, {
         method: "PATCH",
@@ -132,13 +136,45 @@ export function useTrip() {
     }
   };
 
+  const removeEventLocal = (tripId: string, eventId: string) => {
+    setFullTrips((currentTrips) =>
+      currentTrips.map((trip) => {
+        if (trip.trip_id === tripId || (trip as any).id === tripId) {
+          const newTrip = {
+            ...trip,
+            events: trip.events.filter((e) => e.id !== eventId),
+          };
+          return newTrip;
+        }
+        return trip;
+      })
+    );
+  };
+
+  const addEventLocal = (tripId: string, newEvent: any) => {
+    setFullTrips((currentTrips) =>
+      currentTrips.map((trip) => {
+        if (trip.trip_id === tripId || (trip as any).id === tripId) {
+          const newTrip = {
+            ...trip,
+            events: [...(trip.events || []), newEvent],
+          };
+          return newTrip;
+        }
+        return trip;
+      })
+    );
+  };
+
   return {
-    plan: fullTrips, 
+    trips: fullTrips,
     isLoading: isUserLoading || isTripsLoading,
     isError: error,
     refetch: mutate,
     createTrip,
     updateTrip,
     deleteTrip,
+    removeEventLocal,
+    addEventLocal,
   };
 }
