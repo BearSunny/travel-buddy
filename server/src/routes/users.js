@@ -5,7 +5,7 @@ import { checkJwt } from '../middleware/auth.js';
 const router = express.Router();
 
 // Get all users GET http://localhost:5001/api/users
-router.get('/', checkJwt, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT id, email, display_name, created_at FROM users ORDER BY created_at DESC'
@@ -18,7 +18,7 @@ router.get('/', checkJwt, async (req, res) => {
 });
 
 // Get user by ID GET http://localhost:5001/api/users/:id
-router.get('/:id', checkJwt, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result1 = await pool.query(
@@ -46,7 +46,7 @@ router.get('/:id', checkJwt, async (req, res) => {
 });
 
 // Update user profile PUT http://localhost:5001/api/users/profile
-router.put('/profile', checkJwt, async (req, res) => {
+router.put('/profile', async (req, res) => {
   try {
     const { sub: auth0_id } = req.auth; 
     const { display_name } = req.body; 
@@ -68,7 +68,7 @@ router.put('/profile', checkJwt, async (req, res) => {
 });
 
 // Delete user by ID (admin only) DELETE http://localhost:5001/api/users/:id
-router.delete('/:id', checkJwt, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 

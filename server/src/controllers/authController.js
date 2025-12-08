@@ -3,7 +3,7 @@ import pool from '../db.js';
 // Sync Auth0 user into database
 export const syncUser = async (req, res) => {
   try {
-    const { sub: auth0_id, email, name: display_name, picture: avatar } = req.auth;
+    const { sub: auth0_id, email, display_name, picture: avatar } = req.auth;
 
     if (!auth0_id || !email) {
       return res.status(400).json({ error: 'Missing required Auth0 user data' });

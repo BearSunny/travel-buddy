@@ -13,7 +13,7 @@ import { LatLngExpression, LatLngTuple } from "leaflet";
 import { fixLeafletIcons } from "@/lib/FixLeafletIcons";
 import { useEffect, useState } from "react";
 import LeafletGeocoder from "./LeafletGeocoder";
-import CoffeeFinder from "../CoffeeFinder";
+import CoffeeFinder from "./CoffeeFinder";
 
 // --- Types ---
 interface LocationState {
@@ -86,7 +86,7 @@ export default function Map() {
   return (
     <div className="relative h-full w-full">
       {showToast && (
-        <div className="absolute top-5 right-5 z-[2000] bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+        <div className="absolute top-5 right-5 z-[1000] bg-red-500 text-white px-4 py-2 rounded shadow-lg">
           {showToast}
         </div>
       )}
