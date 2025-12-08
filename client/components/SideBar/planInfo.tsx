@@ -42,11 +42,10 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-6 border-b border-gray-200">
+    <div className="flex flex-col pb-4 border-b border-gray-200">
       {/* Header: Title, User, Share */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* REMOVED mt-1 TO ENSURE PERFECT VERTICAL CENTERING */}
           <button
             onClick={onBack}
             className="p-1 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"

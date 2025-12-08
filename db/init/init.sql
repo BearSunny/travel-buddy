@@ -113,6 +113,6 @@ VALUES (
     (SELECT id FROM trips WHERE title = 'Hành trình Đà Nẵng'),
     (SELECT id FROM users WHERE email = 'lechihungdo@gmail.com'),
     'Đi bộ phố cổ',
-    '2025-11-15T08:30:00',
-    '2025-11-15T11:30:00'
+    '2025-11-15T08:30:00+07:00',
+    '2025-11-15T11:30:00+07:00'
 );

@@ -8,7 +8,7 @@ import { useTrip } from "@/hooks/useTrip";
 import { TripProvider } from "@/context/TripContext";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);  
+  const [isOpen, setIsOpen] = useState(false);  
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
   const { trips, isLoading, addEventLocal, removeEventLocal } = useTrip();
 
@@ -19,7 +19,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`
-        relative h-full bg-white shadow-xl z-[1000]
+        relative bg-white shadow-xl z-[1000]
         transition-[width] duration-300 ease-in-out border-r border-gray-200
         ${isOpen ? "w-full md:w-[500px]" : "w-0"}
       `}
@@ -73,9 +73,10 @@ export default function Sidebar() {
         ) : !activeTrip ? (
           <PlanPicker onSelectTrip={(trip) => setActiveTripId(trip.trip_id)} />
         ) : (
-          <div className="flex flex-col h-full p-4">
+          // PLAN VIEW
+          <div className="flex flex-col w-full h-full p-4 overflow-y-auto"> 
             <PlanInfo trip={activeTrip} onBack={() => setActiveTripId(null)} />
-            <div className="flex-1 mt-4 overflow-hidden">
+            <div className="flex-1 overflow-hidden">
               <TripProvider 
                 trip={activeTrip} 
                 isLoading={isLoading}

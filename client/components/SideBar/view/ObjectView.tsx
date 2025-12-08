@@ -5,9 +5,10 @@ import { Trip } from "@/interface/Trip";
 import { Event } from "@/interface/TripEvent";
 import { useState, useMemo, useEffect } from "react";
 import { useTripContext } from "@/context/TripContext";
+import { Icons } from "@/components/ui/Icons";
 
 const formatTime = (date: Date | string) => {
-  const d = new Date(date);
+  const d = new Date(date); 
   return isNaN(d.getTime())
     ? ""
     : new Intl.DateTimeFormat("en-GB", {
@@ -90,6 +91,10 @@ export default function ObjectView() {
       `${dateKey}T${newEvent.endTime || "10:00"}:00`
     );
 
+    console.log(dateKey);
+    console.log(startDateTime, newEvent.startTime);
+    console.log(endDateTime, newEvent.endTime);
+
     try {
       if (!activeTrip) throw Error("There is no activeTrip");
 
@@ -137,6 +142,10 @@ export default function ObjectView() {
     }).format(date);
   };
 
+  useEffect(() => {
+    console.log(events)
+  })
+
   if (isTripLoading) return <div>Loading Trip...</div>;
   if (isEventsLoading) return <div>Loading {eventIds.length} Events...</div>;
 
@@ -159,24 +168,9 @@ export default function ObjectView() {
         )}
 
         {Object.entries(groupedEvents).map(([dateKey, groupEvents]) => (
-          <div key={dateKey} className="mb-8">
-            <div className="flex items-center gap-2 mb-4 sticky top-0 bg-white z-10 py-2">
-              <svg
-                className="text-gray-700"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
+          <div key={dateKey} className="mb-2">
+            <div className="flex items-center gap-2 top-0 bg-white z-10 py-2">
+              <Icons.Calendar/>
               <h2 className="text-lg font-bold text-gray-900 capitalize">
                 {formatGroupHeader(dateKey)}
               </h2>
@@ -256,7 +250,7 @@ export default function ObjectView() {
         ))}
       </div>
 
-      <div className="pt-2 bg-white z-20 sticky bottom-30 border-t border-gray-100">
+      <div className="pt-2 h-40 mb-10 bg-white bottom-30 border-t border-gray-100">
         <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
           Add New Event
         </h3>
