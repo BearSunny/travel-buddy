@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Trip } from "@/interface/Trip";
+import { Icons } from "@/components/ui/Icons";
 
 interface PlanCardProps {
   trip: Trip;
@@ -75,8 +76,9 @@ export default function PlanCard({ trip, onDelete, onClick, isShared = false }: 
       </div>
       <p className="text-gray-600 text-sm">{trip.description}</p>
       <div className="flex gap-4 mt-3 text-sm text-gray-500">
-        <span>
-          📅 {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+        <span className="flex items-center gap-1">
+          <Icons.Calendar/>
+          {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
         </span>
       </div>
     </div>
