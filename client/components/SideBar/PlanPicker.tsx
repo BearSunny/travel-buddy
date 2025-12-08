@@ -15,7 +15,7 @@ interface PlanPickerProps {
 
 export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
   const { user } = useDbUser();
-  const { plan: plans, createTrip, deleteTrip } = useTrip();
+  const { trips, createTrip, deleteTrip } = useTrip();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,14 +46,14 @@ export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
     }
   };
 
-  if (!user) return <div className="p-8 text-center text-gray-500">Log in to view plans.</div>;
+  if (!user) return <div className="p-8 text-center text-gray-500">Log in to view trips.</div>;
 
-  const hasPlans = Array.isArray(plans) && plans.length > 0;
+  const hasTrips = Array.isArray(trips) && trips.length > 0;
 
   return (
     <div className="w-full h-full p-4 overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Your Plans</h2>
+        <h2 className="text-xl font-bold text-gray-900">Your trips</h2>
         <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all shadow-sm active:scale-95"
@@ -63,11 +63,12 @@ export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
         </button>
       </div>
 
-      {!hasPlans ? (
+      {/* There is no trip available */}
+      {!hasTrips ? (
         <EmptyState onCreate={() => setIsModalOpen(true)} />
       ) : (
         <div className="flex flex-col gap-3">
-          {plans.map((trip) => (
+          {trips.map((trip) => (
             <PlanCard
               key={trip.trip_id || (trip as any).id}
               trip={trip}
