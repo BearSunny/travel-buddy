@@ -1,5 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import NavigationBar from "@/components/NavigationBar/NavigationBar";
 import Sidebar from "@/components/SideBar/Sidebar";
 import useUserSync from "@/hooks/UserSync";
@@ -15,13 +17,23 @@ const LazyMap = dynamic(() => import("@/components/map/LeafletMap"), {
 });
 
 export default function HomePage() {
+  const searchParams = useSearchParams();
+  const [sharedTripId, setSharedTripId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const tripParam = searchParams.get('trip');
+    if (tripParam) {
+      setSharedTripId(tripParam);
+    }
+  }, [searchParams]);
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <div className="h-[8%] w-full z-50 relative">
         <NavigationBar />
       </div>
       <div className="flex-1 flex flex-row relative w-full h-[95%]">
-        <Sidebar />
+        <Sidebar sharedTripId={sharedTripId} />
 
         <div className="flex-1 relative transition-all duration-300 ease-in-out">
           <LazyMap />

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useCollaboration, CollaborationUser } from '../hooks/useCollaboration';
 
 interface CollaborationContextType {
-  roomId: string | null;
+  tripId: string | null;
+  roomId: string | null; // Keep for backward compatibility (same as tripId)
   userId: string | null;
   users: Map<string, CollaborationUser>;
   isConnected: boolean;
-  initializeRoom: (roomId: string, userId: string) => void;
+  joinTripRoom: (tripId: string) => void;
+  leaveRoom: () => void;
   generateShareLink: () => string;
   broadcastCursor: (x: number, y: number) => void;
 }
@@ -16,53 +18,60 @@ interface CollaborationContextType {
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
 
 export function CollaborationProvider({ children }: { children: React.ReactNode }) {
-  const [roomId, setRoomId] = useState<string | null>(null);
+  const [tripId, setTripId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Read from URL on mount and initialize if needed
+  // Generate userId once on mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    let urlRoom = params.get('room');
-
-    // Generate room if not in URL
-    if (!urlRoom) {
-      urlRoom = `room_${Date.now()}`;
-      const newUrl = `${window.location.pathname}?room=${urlRoom}`;
-      window.history.replaceState({}, '', newUrl);
-    }
-
-    // Each user generates their own unique userId
     const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    setRoomId(urlRoom);
     setUserId(newUserId);
   }, []);
 
   const collaboration = useCollaboration(
-    roomId || '',
+    tripId || '',
     userId || ''
   );
 
-  const initializeRoom = (newRoomId: string, newUserId: string) => {
-    setRoomId(newRoomId);
-    setUserId(newUserId);
-    const newUrl = `${window.location.pathname}?room=${newRoomId}`;
-    window.history.replaceState({}, '', newUrl);
-  };
+  const joinTripRoom = useCallback((newTripId: string) => {
+    console.log(`[CollaborationContext] Joining trip room: ${newTripId}`);
+    setTripId(newTripId);
+    
+    // Update URL to include trip parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('trip', newTripId);
+    window.history.replaceState({}, '', url.toString());
+  }, []);
 
-  const generateShareLink = () => {
-    if (!roomId) return '';
-    return `${window.location.origin}?room=${roomId}`;
-  };
+  const leaveRoom = useCallback(() => {
+    console.log(`[CollaborationContext] Leaving room`);
+    setTripId(null);
+    
+    // Remove trip parameter from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('trip');
+    window.history.replaceState({}, '', url.toString());
+  }, []);
+
+  const generateShareLink = useCallback(() => {
+    if (!tripId) {
+      console.warn('[CollaborationContext] No tripId to share');
+      return '';
+    }
+    const shareUrl = `${window.location.origin}?trip=${tripId}`;
+    console.log(`[CollaborationContext] Generated share link: ${shareUrl}`);
+    return shareUrl;
+  }, [tripId]);
 
   return (
     <CollaborationContext.Provider
       value={{
-        roomId,
+        tripId,
+        roomId: tripId, // roomId is just an alias for tripId now
         userId,
         users: collaboration.users,
         isConnected: collaboration.isConnected,
-        initializeRoom,
+        joinTripRoom,
+        leaveRoom,
         generateShareLink,
         broadcastCursor: collaboration.broadcastCursor,
       }}

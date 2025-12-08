@@ -1,61 +1,81 @@
-import React from "react";
-import { Icons } from "@/components/ui/Icons";
+"use client";
+
+import React, { useState } from "react";
 import { Trip } from "@/interface/Trip";
 
 interface PlanCardProps {
   trip: Trip;
-  onDelete: (id: string) => void;
+  onDelete: (tripId: string) => void;
   onClick: () => void;
 }
 
 export default function PlanCard({ trip, onDelete, onClick }: PlanCardProps) {
-  const formatDate = (date: string | Date | undefined) => {
-    if (!date) return "TBD";
-    try {
-      const d = new Date(date);
-      // Check if date is "Invalid Date"
-      if (isNaN(d.getTime())) return "Invalid Date";
-      
-      return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-      }).format(d);
-    } catch (e) {
-      return "Error";
-    }
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const tripId = trip.trip_id || (trip as any).id;
+    const shareLink = `${window.location.origin}?trip=${tripId}`;
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  // Fallback for ID mismatch issues
-  const tripId = trip.trip_id || (trip as any).id;
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(trip.trip_id || (trip as any).id);
+  };
+
+  const formatDate = (d: Date | string) => {
+    const date = new Date(d);
+    return isNaN(date.getTime())
+      ? "N/A"
+      : new Intl.DateTimeFormat("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }).format(date);
+  };
 
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 transition-all p-4 cursor-pointer"
+      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-4 border border-gray-200"
     >
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-bold text-gray-900 line-clamp-1">{trip.title}</h3>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm("Delete this plan?")) onDelete(tripId);
-          }}
-          className="text-gray-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Icons.Trash />
-        </button>
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="font-bold text-gray-900 text-base flex-1">{trip.title}</h3>
+        <div className="flex gap-1 ml-2">
+          <button
+            onClick={handleShare}
+            className="p-1.5 hover:bg-blue-50 rounded text-blue-600 transition-colors"
+            title={copied ? "Copied!" : "Share"}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 hover:bg-red-50 rounded text-red-600 transition-colors"
+            title="Delete"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
       </div>
-
-      <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-        <Icons.Calendar />
+      <p className="text-gray-600 text-sm">{trip.description}</p>
+      <div className="flex gap-4 mt-3 text-sm text-gray-500">
         <span>
-          {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+          📅 {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
         </span>
       </div>
-
-      <p className="text-xs text-gray-600 line-clamp-2">
-        {trip.description || "No description."}
-      </p>
     </div>
   );
 }
