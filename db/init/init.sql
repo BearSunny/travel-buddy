@@ -7,7 +7,7 @@ CREATE TABLE users (
     password VARCHAR(255),
     display_name VARCHAR(255),
     avatar TEXT,
-    updated_at DATE
+    updated_at TIMESTAMPTZ
 );
 
 INSERT INTO users (email, password, display_name)
@@ -21,8 +21,8 @@ CREATE TABLE trips (
     owner_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    start_date DATE,
-    end_date DATE,
+    start_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
     CONSTRAINT fk_trips_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -98,8 +98,8 @@ CREATE TABLE trip_events (
     creator_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    start_time DATE,
-    end_time DATE,
+    start_time TIMESTAMPTZ,
+    end_time TIMESTAMPTZ,
     address VARCHAR(512),
     city VARCHAR(255),
     country VARCHAR(255),

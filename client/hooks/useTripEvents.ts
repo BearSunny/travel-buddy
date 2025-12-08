@@ -56,6 +56,7 @@ export function useEvents(
   const createEvent = async (eventData: CreateEventData) => {
     if (!user) throw new Error("User not authenticated");
     try {
+      console.log("New Event info:", eventData)
       const response = await fetch(`${endpoint}/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
