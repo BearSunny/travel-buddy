@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import { useDbUser } from "@/context/userContext";
 import { Event } from "@/interface/TripEvent";
+import { useTripContext } from "@/context/TripContext";
 
 interface CreateEventData {
   trip_id: string;
@@ -33,6 +34,17 @@ export function useEvents(
   ) => void
 ) {
   const { user } = useDbUser();
+  
+  // Safely get TripContext - it might not exist
+  let broadcastEventChange: ((type: 'event_added' | 'event_updated' | 'event_deleted', eventData: any) => void) | undefined;
+  try {
+    const tripContext = useTripContext();
+    broadcastEventChange = tripContext.broadcastEventChange;
+  } catch (e) {
+    // TripContext not available, broadcasting won't work
+    console.warn('[useTripEvents] TripContext not available, event broadcasting disabled');
+  }
+  
   const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
   const endpoint = `${apiUrl}/api/trip_events`;
 
@@ -69,6 +81,12 @@ export function useEvents(
       await mutate((current) => [...(current || []), newEvent], false);
       if (onEventsChange) onEventsChange("create", newEvent);
 
+      // Broadcast event creation to other collaborators
+      if (broadcastEventChange) {
+        console.log('[useTripEvents] Broadcasting event_added:', newEvent);
+        broadcastEventChange('event_added', newEvent);
+      }
+
       return newEvent;
     } catch (err) {
       console.error(err);
@@ -86,6 +104,12 @@ export function useEvents(
       );
 
       if (onEventsChange) onEventsChange("delete", id);
+
+      // Broadcast event deletion to other collaborators
+      if (broadcastEventChange) {
+        console.log('[useTripEvents] Broadcasting event_deleted:', id);
+        broadcastEventChange('event_deleted', id);
+      }
     } catch (err) {
       console.error(err);
       throw err;

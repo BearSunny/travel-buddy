@@ -7,9 +7,10 @@ interface PlanCardProps {
   trip: Trip;
   onDelete: (tripId: string) => void;
   onClick: () => void;
+  isShared?: boolean;
 }
 
-export default function PlanCard({ trip, onDelete, onClick }: PlanCardProps) {
+export default function PlanCard({ trip, onDelete, onClick, isShared = false }: PlanCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = (e: React.MouseEvent) => {
@@ -58,16 +59,18 @@ export default function PlanCard({ trip, onDelete, onClick }: PlanCardProps) {
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
             </svg>
           </button>
-          <button
-            onClick={handleDelete}
-            className="p-1.5 hover:bg-red-50 rounded text-red-600 transition-colors"
-            title="Delete"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
+          {!isShared && (
+            <button
+              onClick={handleDelete}
+              className="p-1.5 hover:bg-red-50 rounded text-red-600 transition-colors"
+              title="Delete"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       <p className="text-gray-600 text-sm">{trip.description}</p>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useCollaboration, CollaborationUser } from '../hooks/useCollaboration';
+import { useCollaboration, CollaborationUser, CollaborationCallbacks } from '../hooks/useCollaboration';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 interface CollaborationContextType {
   tripId: string | null;
@@ -13,6 +14,8 @@ interface CollaborationContextType {
   leaveRoom: () => void;
   generateShareLink: () => string;
   broadcastCursor: (x: number, y: number) => void;
+  broadcastEvent: (type: 'event_added' | 'event_updated' | 'event_deleted', eventData: any) => void;
+  setEventCallbacks: (callbacks: CollaborationCallbacks) => void;
 }
 
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
@@ -20,16 +23,26 @@ const CollaborationContext = createContext<CollaborationContextType | undefined>
 export function CollaborationProvider({ children }: { children: React.ReactNode }) {
   const [tripId, setTripId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [eventCallbacks, setEventCallbacks] = useState<CollaborationCallbacks>({});
+  const { user } = useUser();
 
-  // Generate userId once on mount
+  // Use Auth0 user sub as userId, or generate temp ID if not logged in
   useEffect(() => {
-    const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setUserId(newUserId);
-  }, []);
+    if (user?.sub) {
+      console.log('[CollaborationContext] Using Auth0 user ID:', user.sub);
+      setUserId(user.sub);
+    } else {
+      // Fallback to temp ID if not logged in (shouldn't happen if auth is enforced)
+      const tempUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('[CollaborationContext] No Auth0 user, using temp ID:', tempUserId);
+      setUserId(tempUserId);
+    }
+  }, [user]);
 
   const collaboration = useCollaboration(
     tripId || '',
-    userId || ''
+    userId || '',
+    eventCallbacks
   );
 
   const joinTripRoom = useCallback((newTripId: string) => {
@@ -74,6 +87,8 @@ export function CollaborationProvider({ children }: { children: React.ReactNode 
         leaveRoom,
         generateShareLink,
         broadcastCursor: collaboration.broadcastCursor,
+        broadcastEvent: collaboration.broadcastEvent,
+        setEventCallbacks,
       }}
     >
       {children}

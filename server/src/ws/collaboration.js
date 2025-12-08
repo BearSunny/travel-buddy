@@ -1,10 +1,51 @@
 import { WebSocketServer } from 'ws';
 import * as WebSocket from 'ws';
 import logger from '../utils/logger.js';
+import pool from '../db.js';
 
 // Map to store rooms: roomId -> Set<{ws, userId}>
 const rooms = new Map();
 let messageSequence = 0;
+
+// Add user as collaborator to trip in database
+async function addCollaborator(tripId, userId) {
+  try {
+    logger.info(`[DB] Adding collaborator: tripId=${tripId}, userId=${userId}`);
+    
+    // Look up the database UUID from Auth0 ID
+    // userId might be Auth0 ID (e.g., "google-oauth2|123456") or a temp guest ID
+    const userLookup = await pool.query(
+      'SELECT id FROM users WHERE auth0_id = $1',
+      [userId]
+    );
+    
+    if (userLookup.rows.length === 0) {
+      logger.info(`[DB] User not found in database (auth0_id: ${userId}), skipping collaborator insert`);
+      return;
+    }
+    
+    const databaseUserId = userLookup.rows[0].id;
+    logger.info(`[DB] Resolved Auth0 ID to database UUID: ${databaseUserId}`);
+    
+    const query = `
+      INSERT INTO trip_collaborators (trip_id, user_id, role, status)
+      VALUES ($1, $2, 'editor', 'accepted')
+      ON CONFLICT (trip_id, user_id) DO NOTHING
+      RETURNING *
+    `;
+    
+    const result = await pool.query(query, [tripId, databaseUserId]);
+    
+    if (result.rowCount > 0) {
+      logger.info(`[DB] Collaborator added successfully:`, result.rows[0]);
+    } else {
+      logger.info(`[DB] Collaborator already exists, no changes made`);
+    }
+  } catch (err) {
+    logger.error(`[DB] Error adding collaborator:`, err);
+    // Don't throw but allow collaboration to continue even if DB write fails
+  }
+}
 
 export function setupCollaborationWS(server) {
   const wss = new WebSocketServer({ 
@@ -69,6 +110,14 @@ export function setupCollaborationWS(server) {
           client.displayName = message.displayName;
           client.avatar = message.avatar;
           logger.info(`[WS][Msg #${msgId}][user_profile] Client object updated:`, { userId: client.userId, displayName: client.displayName, avatar: client.avatar });
+          
+          // Add user as collaborator to the trip in database
+          if (userId && roomId) {
+            logger.info(`[WS][Msg #${msgId}][user_profile] Attempting to add collaborator to database...`);
+            addCollaborator(roomId, userId).catch(err => {
+              logger.error(`[WS][Msg #${msgId}][user_profile] Failed to add collaborator:`, err);
+            });
+          }
           
           // NOW broadcast user_joined with complete profile
           const joinMessage = {

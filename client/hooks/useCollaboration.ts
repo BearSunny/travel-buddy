@@ -7,7 +7,7 @@ export interface CollaborationUser {
 }
 
 export interface CollaborationMessage {
-  type: 'user_joined' | 'user_left' | 'cursor_move' | 'update' | 'room_state' | 'user_profile';
+  type: 'user_joined' | 'user_left' | 'cursor_move' | 'update' | 'room_state' | 'user_profile' | 'event_added' | 'event_updated' | 'event_deleted';
   userId?: string;
   roomSize?: number;
   displayName?: string;
@@ -16,13 +16,28 @@ export interface CollaborationMessage {
   users?: Array<{ userId: string; displayName?: string; avatar?: string }>;
   timestamp: string;
   data?: any;
+  tripId?: string;
+  event?: any;
+  eventId?: string;
 }
 
-export function useCollaboration(roomId: string, userId: string) {
+export interface CollaborationCallbacks {
+  onEventAdded?: (event: any) => void;
+  onEventUpdated?: (event: any) => void;
+  onEventDeleted?: (eventId: string) => void;
+}
+
+export function useCollaboration(roomId: string, userId: string, callbacks?: CollaborationCallbacks) {
   const wsRef = useRef<WebSocket | null>(null);
   const [users, setUsers] = useState<Map<string, CollaborationUser>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
   const effectRunCountRef = useRef(0);
+  const callbacksRef = useRef(callbacks);
+
+  // Update callbacks ref when they change
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  }, [callbacks]);
 
   useEffect(() => {
     effectRunCountRef.current += 1;
@@ -174,6 +189,28 @@ export function useCollaboration(roomId: string, userId: string) {
           }
         }
 
+        // Handle event synchronization messages
+        if (message.type === 'event_added') {
+          console.log(`[useCollaboration][Effect #${effectId}][event_added] ✨ Event added:`, message.event);
+          if (callbacksRef.current?.onEventAdded && message.userId !== userId) {
+            callbacksRef.current.onEventAdded(message.event);
+          }
+        }
+
+        if (message.type === 'event_updated') {
+          console.log(`[useCollaboration][Effect #${effectId}][event_updated] ✏️ Event updated:`, message.event);
+          if (callbacksRef.current?.onEventUpdated && message.userId !== userId) {
+            callbacksRef.current.onEventUpdated(message.event);
+          }
+        }
+
+        if (message.type === 'event_deleted') {
+          console.log(`[useCollaboration][Effect #${effectId}][event_deleted] 🗑️ Event deleted:`, message.eventId);
+          if (callbacksRef.current?.onEventDeleted && message.userId !== userId) {
+            callbacksRef.current.onEventDeleted(message.eventId);
+          }
+        }
+
         // Handle other collaboration messages (activity_added, etc.)
         if (message.type === 'activity_added' || 
             message.type === 'activity_updated' || 
@@ -247,10 +284,26 @@ export function useCollaboration(roomId: string, userId: string) {
     }
   }, []);
 
+  const broadcastEvent = useCallback((type: 'event_added' | 'event_updated' | 'event_deleted', eventData: any) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      const message = {
+        type,
+        tripId: roomId,
+        ...(type === 'event_deleted' ? { eventId: eventData } : { event: eventData }),
+        timestamp: new Date().toISOString()
+      };
+      console.log(`[useCollaboration][broadcastEvent] 📤 Broadcasting ${type}:`, message);
+      wsRef.current.send(JSON.stringify(message));
+    } else {
+      console.warn(`[useCollaboration][broadcastEvent] ⚠️ Cannot broadcast, WebSocket not open (state: ${wsRef.current?.readyState})`);
+    }
+  }, [roomId]);
+
   return {
     users,
     isConnected,
     broadcastCursor,
-    broadcastActivity
+    broadcastActivity,
+    broadcastEvent
   };
 }

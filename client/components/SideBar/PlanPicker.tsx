@@ -121,16 +121,12 @@ export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId
                     trip={trip}
                     onDelete={handleDelete}
                     onClick={() => onSelectTrip(trip)}
+                    isShared={isShared}
                   />
                 </div>
-                {isShared && (
+                {(isShared || isHighlighted) && (
                   <div className="mt-1 px-4 py-2 bg-blue-50 text-blue-700 text-xs font-medium rounded-b-lg border border-t-0 border-blue-200">
                     📍 Shared trip - Click to view and collaborate
-                  </div>
-                )}
-                {isHighlighted && (
-                  <div className="mt-1 px-4 py-2 bg-blue-50 text-blue-700 text-xs font-medium rounded-b-lg border border-t-0 border-blue-200">
-                    📍 This trip is being shared with you
                   </div>
                 )}
               </div>
