@@ -40,6 +40,16 @@ export const TripProvider = ({
     return trip?.events?.map((e) => ({ id: e.id })) || [];
   }, [trip]);
 
+  // Dispatch custom event when trip changes (for components outside TripProvider)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('tripChanged', { 
+        detail: trip 
+      });
+      window.dispatchEvent(event);
+    }
+  }, [trip]);
+
   // Subscribe to remote event changes
   useEffect(() => {
     if (!trip || !isConnected) return;

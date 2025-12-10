@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useCollaborationContext } from "@/context/CollaborationContext";
+import { useDbUser } from "@/context/userContext";
 import { getColorForUser, getAnimalForUser } from "@/utils/avatarGenerator";
 import { Icons } from "../ui/Icons";
 import { Trip } from "@/interface/Trip";
@@ -14,9 +15,12 @@ interface PlanInfoProps {
 export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
   const { tripId, userId, users, isConnected, generateShareLink, joinTripRoom, leaveRoom } =
     useCollaborationContext();
+  const { user } = useDbUser();
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [category, setCategory] = useState("Other");
+  const [exportDescription, setExportDescription] = useState("");
 
   // Join room when PlanInfo mounts
   useEffect(() => {
@@ -43,14 +47,48 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
   };
 
   const handleExportTemplate = async () => {
+    if (!user) {
+      alert("Please log in to export templates");
+      return;
+    }
+
     setIsExporting(true);
     try {
-      console.log("Exporting plan as template:", trip);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert("Plan exported as template!");
+      const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
+      const tripId = trip.trip_id || (trip as any).id;
+      
+      const response = await fetch(`${apiUrl}/api/templates/export`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trip_id: tripId,
+          user_id: user.id,
+          category,
+          description: exportDescription || trip.description,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error("Export failed:", response.status, errorData);
+        
+        // Check for ownership error
+        if (response.status === 403 && errorData.error?.includes('owner')) {
+          throw new Error("Only trip owners can export templates. Ask the trip owner to export this trip.");
+        }
+        
+        throw new Error(errorData.error || `Failed to export template (${response.status})`);
+      }
+
+      const template = await response.json();
+      console.log("Template exported:", template);
+      alert("🎉 Template exported successfully! Others can now discover your itinerary in the Templates tab.");
       setShowExportModal(false);
+      setCategory("Other");
+      setExportDescription("");
     } catch (error) {
-      alert("Failed to export plan as template.");
+      console.error("Export error:", error);
+      alert(`Failed to export template: ${error instanceof Error ? error.message : 'Please try again'}`);
     } finally {
       setIsExporting(false);
     }
@@ -69,6 +107,9 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
           year: "numeric",
         }).format(date);
   };
+
+  // Check if current user is the trip owner
+  const isOwner = user && trip.owner_id === user.id;
 
   return (
     <div className="flex flex-col gap-4 pb-6 border-b border-gray-200">
@@ -112,18 +153,20 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
-            title="Export plan as template"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export
-          </button>
+          {isOwner && (
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
+              title="Export plan as template"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export
+            </button>
+          )}
 
           <button
             onClick={handleShare}
@@ -167,15 +210,55 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
       {/* Export Modal */}
       {showExportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Export as Template</h2>
-            <p className="text-gray-600 text-sm mb-6">
-              This will make this plan available in the Templates tab for other users to discover.
-            </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-              <p className="text-xs text-blue-900"><strong>Plan:</strong> {trip.title}</p>
-              <p className="text-xs text-blue-900"><strong>Duration:</strong> {formatDate(trip.start_date)} - {formatDate(trip.end_date)}</p>
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Share Your Trip as a Template</h2>
+            
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+              <p className="text-sm text-yellow-800 mb-2">
+                <strong>Please Note:</strong>
+              </p>
+              <ul className="text-xs text-yellow-800 space-y-1 list-disc list-inside">
+                <li><strong>Public:</strong> Your trip will be visible to all users</li>
+                <li><strong>Customizable:</strong> Others can modify when using</li>
+                <li><strong>Final Version:</strong> Cannot be edited after export</li>
+                <li><strong>Privacy:</strong> Specific dates and collaborators will be removed</li>
+              </ul>
             </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  <option value="Beach">Beach</option>
+                  <option value="City">City</option>
+                  <option value="Adventure">Adventure</option>
+                  <option value="Cultural">Cultural</option>
+                  <option value="Nature">Nature</option>
+                  <option value="Food">Food & Dining</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={exportDescription}
+                  onChange={(e) => setExportDescription(e.target.value)}
+                  placeholder={trip.description || "Describe your trip template..."}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
+                />
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowExportModal(false)}
@@ -189,7 +272,7 @@ export default function PlanInfo({ trip, onBack }: PlanInfoProps) {
                 disabled={isExporting}
                 className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-semibold transition-colors"
               >
-                {isExporting ? "Exporting..." : "Export"}
+                {isExporting ? "Exporting..." : "Export Template"}
               </button>
             </div>
           </div>

@@ -12,6 +12,8 @@ interface CreateEventData {
   address?: string;
   city?: string;
   country?: string;
+  latitude?: number;
+  longitude?: number;
   status: string;
   cost?: string;
   image?: string;

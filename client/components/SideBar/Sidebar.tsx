@@ -57,6 +57,7 @@ export default function Sidebar() {
       
       if (Array.isArray(data) && data.length > 0 && data[0].trip) {
         const tripData = data[0].trip;
+        const tripEvents = data[0].trip_events || [];
         // Transform to Trip interface format
         const trip: Trip = {
           trip_id: tripData.id,
@@ -65,10 +66,17 @@ export default function Sidebar() {
           start_date: tripData.start_date,
           end_date: tripData.end_date,
           owner_id: tripData.owner_id,
-          events: []
+          events: tripEvents
         };
         setSharedTrip(trip);
-        console.log(`[Sidebar] Shared trip loaded successfully:`, trip);
+        console.log(`[Sidebar] Shared trip loaded successfully with ${tripEvents.length} events:`, trip);
+        
+        // Dispatch tripChanged event for map to receive events
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('tripChanged', { detail: trip });
+          window.dispatchEvent(event);
+          console.log(`[Sidebar] Dispatched tripChanged event with ${tripEvents.length} events`);
+        }
       } else {
         throw new Error('Trip not found or invalid response format');
       }
@@ -88,6 +96,12 @@ export default function Sidebar() {
         console.log(`[Sidebar] Shared trip now found in regular trips array, clearing temporary state`);
         setSharedTrip(null);
         setActiveTripId(sharedTripId); // Auto-select the shared trip
+        
+        // Dispatch for the regular trip
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('tripChanged', { detail: foundInTrips });
+          window.dispatchEvent(event);
+        }
       }
     }
   }, [trips, sharedTripId, hasRefetchedForShared, sharedTrip]);
@@ -181,7 +195,14 @@ export default function Sidebar() {
         ) : (
           // PLAN VIEW
           <div className="flex flex-col w-full h-full p-4 overflow-y-auto"> 
-            <PlanInfo trip={activeTrip} onBack={() => setActiveTripId(null)} />
+            <PlanInfo trip={activeTrip} onBack={() => {
+              setActiveTripId(null);
+              // Clear the map markers by dispatching tripChanged with null
+              if (typeof window !== 'undefined') {
+                const event = new CustomEvent('tripChanged', { detail: null });
+                window.dispatchEvent(event);
+              }
+            }} />
             <div className="flex-1 overflow-hidden">
               <TripProvider 
                 trip={activeTrip} 
