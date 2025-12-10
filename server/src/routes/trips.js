@@ -62,7 +62,7 @@ router.get("/read/:id", async (req, res) => {
     }
 
     const result2 = await pool.query(
-      "SELECT id FROM trip_events WHERE trip_id = $1",
+      "SELECT * FROM trip_events WHERE trip_id = $1 ORDER BY start_time",
       values
     );
 
