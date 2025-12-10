@@ -60,7 +60,7 @@ CREATE TABLE trip_collaborators (
     user_id UUID NOT NULL,
     role collab_role NOT NULL DEFAULT 'editor',
     status collab_status NOT NULL DEFAULT 'invited',
-    invited_by UUID NOT NULL,
+    invited_by UUID,
     CONSTRAINT fk_tc_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
     CONSTRAINT fk_tc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_tc_inviter FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE,

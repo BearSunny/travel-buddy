@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useDbUser } from "@/context/userContext";
 import { Trip } from "@/interface/Trip";
 import { Icons } from "@/components/ui/Icons";
@@ -8,17 +8,50 @@ import EmptyState from "./trip/EmptyState";
 import PlanCard from "./trip/PlanCard";
 import CreatePlanModal from "./trip/CreatePlanModal";
 import { useTrip } from "@/hooks/useTrip";
+import LoginButton from "@/components/NavigationBar/LoginButton";
 
 interface PlanPickerProps {
   onSelectTrip: (trip: Trip) => void;
+  sharedTrip?: Trip | null;
+  highlightedTripId?: string | null;
 }
 
-export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
+export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId }: PlanPickerProps) {
   const { user } = useDbUser();
   const { trips, createTrip, deleteTrip } = useTrip();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Combine user trips with shared trip
+  const allTrips = useMemo(() => {
+    if (!sharedTrip) return trips || [];
+    
+    // Check if shared trip is already in user's trips
+    const sharedTripId = sharedTrip.trip_id || (sharedTrip as any).id;
+    const alreadyOwned = trips?.some(t => 
+      (t.trip_id || (t as any).id) === sharedTripId
+    );
+    
+    if (alreadyOwned) {
+      console.log('[PlanPicker] Shared trip is already owned by user');
+      return trips || [];
+    }
+    
+    // Add shared trip at the top
+    console.log('[PlanPicker] Adding shared trip to list');
+    return [sharedTrip, ...(trips || [])];
+  }, [sharedTrip, trips]);
+
+  // Auto-highlight the shared trip
+  useEffect(() => {
+    if (highlightedTripId && trips && trips.length > 0) {
+      const foundTrip = trips.find(t => (t.trip_id || (t as any).id) === highlightedTripId);
+      if (foundTrip) {
+        console.log(`[PlanPicker] Highlighting shared trip:`, foundTrip);
+      }
+    }
+  }, [highlightedTripId, trips]);
 
   const handleDelete = async (tripId: string) => {
     if (!confirm("Delete this plan?")) return;
@@ -46,9 +79,12 @@ export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
     }
   };
 
-  if (!user) return <div className="p-8 text-center text-gray-500">Log in to view trips.</div>;
+  if (!user) return (  
+      <LoginButton />
+  );
 
-  const hasTrips = Array.isArray(trips) && trips.length > 0;
+  const hasTrips = allTrips.length > 0;
+  const sharedTripId = sharedTrip ? (sharedTrip.trip_id || (sharedTrip as any).id) : null;
 
   return (
     <div className="w-full h-full p-4 overflow-y-auto">
@@ -63,19 +99,39 @@ export default function PlanPicker({ onSelectTrip }: PlanPickerProps) {
         </button>
       </div>
 
-      {/* There is no trip available */}
       {!hasTrips ? (
         <EmptyState onCreate={() => setIsModalOpen(true)} />
       ) : (
         <div className="flex flex-col gap-3">
-          {trips.map((trip) => (
-            <PlanCard
-              key={trip.trip_id || (trip as any).id}
-              trip={trip}
-              onDelete={handleDelete}
-              onClick={() => onSelectTrip(trip)}
-            />
-          ))}
+          {allTrips.map((trip) => {
+            const tripId = trip.trip_id || (trip as any).id;
+            const isShared = tripId === sharedTripId;
+            const isHighlighted = tripId === highlightedTripId;
+            
+            return (
+              <div key={tripId}>
+                <div
+                  className={`transition-all ${
+                    isShared
+                      ? "ring-2 ring-blue-500 ring-offset-2 rounded-lg"
+                      : ""
+                  }`}
+                >
+                  <PlanCard
+                    trip={trip}
+                    onDelete={handleDelete}
+                    onClick={() => onSelectTrip(trip)}
+                    isShared={isShared}
+                  />
+                </div>
+                {(isShared || isHighlighted) && (
+                  <div className="mt-1 px-4 py-2 bg-blue-50 text-blue-700 text-xs font-medium rounded-b-lg border border-t-0 border-blue-200">
+                    📍 Shared trip - Click to view and collaborate
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
