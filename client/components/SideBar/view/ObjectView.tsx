@@ -6,6 +6,7 @@ import { Event } from "@/interface/TripEvent";
 import { useState, useMemo, useEffect } from "react";
 import { useTripContext } from "@/context/TripContext";
 import { Icons } from "@/components/ui/Icons";
+import EventCard from "../events/EventCard"; // Import the new component
 import LocationAutocomplete from "@/components/map/LocationAutocomplete";
 import { GeocodedLocation } from "@/utils/geocoding";
 
@@ -28,12 +29,14 @@ export default function ObjectView() {
     isLoading: isTripLoading,
     removeEventLocal,
     addEventLocal,
-  } = useTripContext(); // Get Trip ids.
+  } = useTripContext(); 
+
   const {
     events,
     isLoading: isEventsLoading,
     createEvent,
     deleteEvent,
+    updateEvent,
   } = useEvents(eventIds, (action, payload) => {
     if (!activeTrip) return;
 
@@ -43,6 +46,16 @@ export default function ObjectView() {
       addEventLocal(activeTrip.trip_id, payload);
     }
   });
+
+  // 2. Add state for selected event
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+  // 3. Derive selected event (keeps it fresh with live updates)
+  const selectedEvent = useMemo(
+    () => events.find((e) => e.id === selectedEventId) || null,
+    [events, selectedEventId]
+  );
+
   const [newEvent, setNewEvent] = useState({
     title: "",
     date: activeTrip?.start_date
@@ -95,10 +108,6 @@ export default function ObjectView() {
       `${dateKey}T${newEvent.endTime || "10:00"}:00`
     );
 
-    console.log(dateKey);
-    console.log(startDateTime, newEvent.startTime);
-    console.log(endDateTime, newEvent.endTime);
-
     try {
       if (!activeTrip) throw Error("There is no activeTrip");
 
@@ -132,9 +141,11 @@ export default function ObjectView() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent opening the card when clicking delete
     if (!confirm("Are you sure you want to delete this event?")) return;
     try {
+      if (selectedEventId === id) setSelectedEventId(null);
       await deleteEvent(id);
     } catch (error) {
       console.error("Failed to delete", error);
@@ -144,7 +155,6 @@ export default function ObjectView() {
   const formatGroupHeader = (dateKey: string) => {
     if (dateKey === "Unscheduled") return "Unscheduled";
     const date = new Date(dateKey);
-    // Format: Monday, 11 November
     return new Intl.DateTimeFormat("en-GB", {
       weekday: "long",
       day: "numeric",
@@ -154,7 +164,7 @@ export default function ObjectView() {
   };
 
   useEffect(() => {
-    console.log(events)
+    console.log(events);
   })
 
   if (isTripLoading) return <div>Loading Trip...</div>;
@@ -192,6 +202,8 @@ export default function ObjectView() {
 
               {groupEvents.map((e, index) => {
                 const isLast = index === groupEvents.length - 1;
+                const isSelected = e.id === selectedEventId;
+
                 return (
                   <div key={e.id} className="relative mb-6">
                     {!isLast && (
@@ -202,14 +214,24 @@ export default function ObjectView() {
                       {index + 1}
                     </div>
 
-                    <div className="bg-[#f3f4f6] rounded-xl p-3 flex gap-3 shadow-sm hover:shadow-md transition-shadow relative group border border-transparent hover:border-gray-200">
+                    {/* 4. Make this clickable and add visual feedback for selection */}
+                    <div 
+                      onClick={() => setSelectedEventId(e.id)}
+                      className={`
+                        rounded-xl p-3 flex gap-3 shadow-sm transition-all relative group border cursor-pointer
+                        ${isSelected 
+                            ? "bg-blue-50 border-blue-400 ring-1 ring-blue-400 shadow-md" 
+                            : "bg-[#f3f4f6] border-transparent hover:border-gray-200 hover:shadow-md"
+                        }
+                      `}
+                    >
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div className="flex justify-between items-start">
                           <h3 className="font-bold text-gray-900 text-sm truncate mr-2">
                             {e.title}
                           </h3>
                           <button
-                            onClick={() => handleDelete(e.id)}
+                            onClick={(event) => handleDelete(event, e.id)}
                             className="text-gray-400 hover:text-red-600 transition-colors"
                           >
                             <svg
@@ -385,6 +407,14 @@ export default function ObjectView() {
           </div>
         </div>
       </div>
+
+      {/* 5. The Sliding Card Component */}
+      <EventCard
+        event={selectedEvent}
+        isOpen={!!selectedEventId}
+        onClose={() => setSelectedEventId(null)}
+        onUpdate={updateEvent}
+      />
     </div>
   );
 }

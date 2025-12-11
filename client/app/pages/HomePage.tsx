@@ -42,7 +42,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
-      <div className="h-[8%] w-full z-50 relative">
+      <div className="h-[8%] w-full z-501 relative">
         <NavigationBar />
       </div>
       <div className="flex-1 flex flex-row relative w-full h-[92%]">

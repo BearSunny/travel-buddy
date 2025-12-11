@@ -12,7 +12,7 @@ export interface Event {
   latitude?: number,
   longitude?: number,
   status: string,
-  cost: string;
+  cost: number;
   image: string;
   timeRange?: string;
   travelTime?: string;

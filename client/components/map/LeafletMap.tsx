@@ -241,9 +241,9 @@ export default function Map({ events = [] }: MapProps) {
             </div>
 
             {/* The Coffee Button (Fixed width on desktop, full width on mobile) */}
-            <div className="pointer-events-auto w-full md:w-auto">
-              <CoffeeFinder onToast={(msg) => setShowToast(msg)} />
-            </div>
+            {/* <div className="pointer-events-auto w-full md:w-auto"> */}
+              {/* <CoffeeFinder onToast={(msg) => setShowToast(msg)} /> */}
+            {/* </div> */}
           </div>
         </div>
       </MapContainer>
