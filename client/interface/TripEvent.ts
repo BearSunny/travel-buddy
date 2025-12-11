@@ -9,6 +9,8 @@ export interface Event {
   address: string,
   city: string,
   country: string,
+  latitude?: number,
+  longitude?: number,
   status: string,
   cost: number;
   image: string;

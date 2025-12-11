@@ -7,6 +7,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useTripContext } from "@/context/TripContext";
 import { Icons } from "@/components/ui/Icons";
 import EventCard from "../events/EventCard"; // Import the new component
+import LocationAutocomplete from "@/components/map/LocationAutocomplete";
+import { GeocodedLocation } from "@/utils/geocoding";
 
 const formatTime = (date: Date | string) => {
   const d = new Date(date); 
@@ -62,8 +64,9 @@ export default function ObjectView() {
     startTime: "",
     endTime: "",
     cost: "",
+    location: "",
   });
-
+  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
     const sorted = [...events].sort(
@@ -116,6 +119,11 @@ export default function ObjectView() {
         end_time: endDateTime,
         cost: newEvent.cost,
         description: "",
+        address: selectedLocation?.display_name || newEvent.location,
+        city: selectedLocation?.city,
+        country: selectedLocation?.country,
+        latitude: selectedLocation?.latitude,
+        longitude: selectedLocation?.longitude,
       });
 
       setNewEvent((prev) => ({
@@ -124,7 +132,9 @@ export default function ObjectView() {
         startTime: "",
         endTime: "",
         cost: "",
+        location: "",
       }));
+      setSelectedLocation(null);
     } catch (error) {
       console.error("Failed to add event", error);
       alert("Failed to create event");
@@ -310,6 +320,33 @@ export default function ObjectView() {
               value={newEvent.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
             />
+          </div>
+          <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
+            <div className="flex items-center justify-center text-gray-400 pl-1">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <LocationAutocomplete
+                value={newEvent.location}
+                onChange={(value, location) => {
+                  handleInputChange("location", value);
+                  setSelectedLocation(location);
+                }}
+                placeholder="Where?"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
             <div className="flex items-center gap-1">

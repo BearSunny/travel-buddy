@@ -103,7 +103,10 @@ CREATE TABLE trip_events (
     address VARCHAR(512),
     city VARCHAR(255),
     country VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
     status event_status NOT NULL DEFAULT 'planned',
+    cost INTEGER DEFAULT 0,
     CONSTRAINT fk_te_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
     CONSTRAINT fk_te_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -115,4 +118,55 @@ VALUES (
     'Đi bộ phố cổ',
     '2025-11-15T08:30:00+07:00',
     '2025-11-15T11:30:00+07:00'
+);
+
+-- Trip Templates Table
+CREATE TABLE trip_templates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    original_trip_id UUID,
+    creator_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration_days INTEGER NOT NULL,
+    category VARCHAR(100),
+    thumbnail_url TEXT,
+    is_public BOOLEAN DEFAULT true,
+    usage_count INTEGER DEFAULT 0,
+    rating_sum INTEGER DEFAULT 0,
+    rating_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_template_trip FOREIGN KEY (original_trip_id) REFERENCES trips(id) ON DELETE SET NULL,
+    CONSTRAINT fk_template_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Template Events (stores the itinerary structure)
+CREATE TABLE template_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    template_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    day_number INTEGER NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    address VARCHAR(512),
+    city VARCHAR(255),
+    country VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    order_index INTEGER DEFAULT 0,
+    CONSTRAINT fk_te_template FOREIGN KEY (template_id) REFERENCES trip_templates(id) ON DELETE CASCADE
+);
+
+-- Template Ratings
+CREATE TABLE template_ratings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    template_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_rating_template FOREIGN KEY (template_id) REFERENCES trip_templates(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rating_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT uc_template_user_rating UNIQUE (template_id, user_id)
 );
