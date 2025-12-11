@@ -18,10 +18,11 @@ router.post("/create", async (req, res) => {
       latitude,
       longitude,
       status,
+      cost,
     } = req.body;
 
     console.log(
-      `[INFO]. Params: {trip_id: ${trip_id}, creator_id: ${creator_id}, title: "${title}", description: "${description}", start_time: ${start_time}, end_time: ${end_time}, address: ${address}, city: ${city}, country: ${country}, latitude: ${latitude}, longitude: ${longitude}, status: ${status}}`
+      `[INFO]. Params: {trip_id: ${trip_id}, creator_id: ${creator_id}, title: "${title}", description: "${description}", start_time: ${start_time}, end_time: ${end_time}, address: ${address}, city: ${city}, country: ${country}, latitude: ${latitude}, longitude: ${longitude}, status: ${status}, cost: ${cost}}`
     );
     if (!trip_id || !creator_id || !title || !status) {
       return res.status(400).json({ error: "Missing required field" });
@@ -63,7 +64,7 @@ router.post("/create", async (req, res) => {
     }
 
     const q =
-      "INSERT INTO trip_events (trip_id, creator_id, title, description, start_time, end_time, address, city, country, latitude, longitude, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, trip_id, creator_id, title, description, start_time, end_time, address, city, country, latitude, longitude, status;";
+      "INSERT INTO trip_events (trip_id, creator_id, title, description, start_time, end_time, address, city, country, latitude, longitude, status, cost) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id, trip_id, creator_id, title, description, start_time, end_time, address, city, country, latitude, longitude, status, cost;";
     const values = [
       trip_id,
       creator_id,
@@ -77,6 +78,7 @@ router.post("/create", async (req, res) => {
       latitude || null,
       longitude || null,
       status,
+      cost
     ];
 
     const { rows } = await pool.query(q, values);
@@ -121,6 +123,9 @@ router.patch("/update/:id", async (req, res) => {
       "city",
       "country",
       "status",
+      "latitude",
+      "longitude",
+      "cost"
     ]);
     const keys = Object.keys(payload).filter((k) => allowed.has(k));
 
@@ -187,7 +192,7 @@ router.patch("/update/:id", async (req, res) => {
     values.push(id);
     const q = `UPDATE trip_events SET ${sets.join(
       ", "
-    )} WHERE id = $${idx} RETURNING id, trip_id, creator_id, title, description, start_time, end_time, address, city, country, status;`;
+    )} WHERE id = $${idx} RETURNING id, trip_id, creator_id, title, description, start_time, end_time, address, city, country, latitude, longitude, status, cost;`;
     const { rows } = await pool.query(q, values);
     if (rows.length === 0) {
       return res.status(404).json({ error: "Trip event not found" });
