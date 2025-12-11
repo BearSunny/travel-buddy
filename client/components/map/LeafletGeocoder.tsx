@@ -114,7 +114,6 @@ export default function LeafletGeocoder() {
 
   return (
     <div className="relative font-sans text-black w-full pointer-events-none md:pointer-events-auto ">
-      {/* SHARED STYLE: h-12, bg-white, border-gray-300, rounded-lg, shadow-md */}
       <div className="relative w-full">
         <input
           type="text"
@@ -123,7 +122,6 @@ export default function LeafletGeocoder() {
           placeholder="Search location..."
           className="w-full h-12 px-4 pr-10 rounded-lg border border-gray-300 bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         />
-        {/* Spinner inside input */}
         {isSearching && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -131,7 +129,6 @@ export default function LeafletGeocoder() {
         )}
       </div>
 
-      {/* Dropdown Results */}
       {isOpen && (
         <ul className="absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto border border-gray-200 bg-white rounded-lg shadow-xl z-[1100]">
           {noResults ? (

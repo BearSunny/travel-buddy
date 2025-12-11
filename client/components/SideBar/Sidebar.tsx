@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PlanInfo from "./planInfo";
-import ViewRouter from "./viewRouter";
+import PlanInfo from "./PlanInfo";
+import ViewRouter from "./ViewRouter";
 import PlanPicker from "./PlanPicker";
 import { useTrip } from "@/hooks/useTrip";
 import { TripProvider } from "@/context/TripContext";
@@ -19,7 +19,6 @@ export default function Sidebar() {
   const [sharedTripError, setSharedTripError] = useState<string | null>(null);
   const [hasRefetchedForShared, setHasRefetchedForShared] = useState(false);
 
-  // Check URL for shared trip parameter on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tripId = urlParams.get('trip');
@@ -29,8 +28,6 @@ export default function Sidebar() {
       setSharedTripId(tripId);
       fetchSharedTrip(tripId);
       
-      // Refetch trips after a delay to allow DB write to complete
-      // This ensures the shared trip appears in the regular trips array
       console.log(`[Sidebar] Scheduling refetch for shared trip...`);
       setTimeout(() => {
         console.log(`[Sidebar] Refetching trips to include newly shared trip`);
@@ -57,7 +54,6 @@ export default function Sidebar() {
       
       if (Array.isArray(data) && data.length > 0 && data[0].trip) {
         const tripData = data[0].trip;
-        // Transform to Trip interface format
         const trip: Trip = {
           trip_id: tripData.id,
           title: tripData.title,
@@ -99,7 +95,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`
-        relative bg-white shadow-xl z-[1000]
+        relative bg-white shadow-xl z-[500]
         transition-[width] duration-300 ease-in-out border-r border-gray-200
         ${isOpen ? "w-full md:w-[500px]" : "w-0"}
       `}

@@ -19,6 +19,7 @@ interface CreateEventData {
   travelTime?: string;
   distance?: string;
 }
+
 const batchFetcher = async (...args: (string | string[])[]) => {
   const urls = (Array.isArray(args[0]) ? args[0] : args) as string[];
   if (urls.length === 0) return [];
@@ -29,19 +30,17 @@ const batchFetcher = async (...args: (string | string[])[]) => {
 export function useEvents(
   baseEvents: { id: string }[],
   onEventsChange?: (
-    action: "create" | "delete",
+    action: "create" | "delete" | "update",
     payload: Event | string
   ) => void
 ) {
   const { user } = useDbUser();
   
-  // Safely get TripContext - it might not exist
   let broadcastEventChange: ((type: 'event_added' | 'event_updated' | 'event_deleted', eventData: any) => void) | undefined;
   try {
     const tripContext = useTripContext();
     broadcastEventChange = tripContext.broadcastEventChange;
   } catch (e) {
-    // TripContext not available, broadcasting won't work
     console.warn('[useTripEvents] TripContext not available, event broadcasting disabled');
   }
   
@@ -65,10 +64,11 @@ export function useEvents(
     fallbackData: [],
   });
 
+  // --- ACTIONS ---
+
   const createEvent = async (eventData: CreateEventData) => {
     if (!user) throw new Error("User not authenticated");
     try {
-      console.log("New Event info:", eventData)
       const response = await fetch(`${endpoint}/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,15 +81,51 @@ export function useEvents(
       await mutate((current) => [...(current || []), newEvent], false);
       if (onEventsChange) onEventsChange("create", newEvent);
 
-      // Broadcast event creation to other collaborators
       if (broadcastEventChange) {
-        console.log('[useTripEvents] Broadcasting event_added:', newEvent);
         broadcastEventChange('event_added', newEvent);
       }
 
       return newEvent;
     } catch (err) {
       console.error(err);
+      throw err;
+    }
+  };
+
+  const updateEvent = async (eventId: string, updates: Partial<Event>) => {
+    try {
+      // 1. Optimistic Update
+      await mutate((currentEvents) => {
+        if (!currentEvents) return [];
+        return currentEvents.map((e) => 
+          e.id === eventId ? { ...e, ...updates } : e
+        );
+      }, false);
+
+      // 2. API Call
+      const response = await fetch(`${endpoint}/update/${eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) throw new Error("Failed to update event");
+      const updatedEvent = await response.json();
+
+      // 3. Re-validate to ensure data consistency
+      await mutate(); 
+
+      if (onEventsChange) onEventsChange("update", updatedEvent);
+
+      if (broadcastEventChange) {
+        broadcastEventChange('event_updated', updatedEvent);
+      }
+
+      return updatedEvent;
+    } catch (err) {
+      console.error(err);
+      // Rollback on error would happen here by calling mutate() without args
+      await mutate();
       throw err;
     }
   };
@@ -105,9 +141,7 @@ export function useEvents(
 
       if (onEventsChange) onEventsChange("delete", id);
 
-      // Broadcast event deletion to other collaborators
       if (broadcastEventChange) {
-        console.log('[useTripEvents] Broadcasting event_deleted:', id);
         broadcastEventChange('event_deleted', id);
       }
     } catch (err) {
@@ -121,6 +155,7 @@ export function useEvents(
     isLoading: isLoading && !!urls,
     isError: error,
     createEvent,
+    updateEvent, // Exporting the new function
     deleteEvent,
     mutate,
   };

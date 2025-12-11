@@ -10,7 +10,7 @@ export interface Event {
   city: string,
   country: string,
   status: string,
-  cost: string;
+  cost: number;
   image: string;
   timeRange?: string;
   travelTime?: string;

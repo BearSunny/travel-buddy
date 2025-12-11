@@ -13,7 +13,7 @@ import { LatLngExpression, LatLngTuple } from "leaflet";
 import { fixLeafletIcons } from "@/lib/FixLeafletIcons";
 import { useEffect, useState } from "react";
 import LeafletGeocoder from "./LeafletGeocoder";
-import CoffeeFinder from "./CoffeeFinder";
+// import CoffeeFinder from "./CoffeeFinder";
 
 // --- Types ---
 interface LocationState {
@@ -111,8 +111,8 @@ export default function Map() {
           </Marker>
         )}
 
-        <ZoomControl position="bottomright" />
-        <div className="absolute top-4 left-4 z-[1000] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
+        <ZoomControl position="bottomright"/>
+        <div className="absolute top-4 left-4 z-[400] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
           <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
             
             {/* The Search Bar (Grows on desktop) */}
@@ -121,9 +121,9 @@ export default function Map() {
             </div>
 
             {/* The Coffee Button (Fixed width on desktop, full width on mobile) */}
-            <div className="pointer-events-auto w-full md:w-auto">
-              <CoffeeFinder onToast={(msg) => setShowToast(msg)} />
-            </div>
+            {/* <div className="pointer-events-auto w-full md:w-auto"> */}
+              {/* <CoffeeFinder onToast={(msg) => setShowToast(msg)} /> */}
+            {/* </div> */}
           </div>
         </div>
       </MapContainer>

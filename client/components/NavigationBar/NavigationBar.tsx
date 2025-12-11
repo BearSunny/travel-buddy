@@ -4,7 +4,7 @@ import "@/app/styles/globals.css";
 
 export default function NavigationBar() {
   return (
-    <div className="w-full h-full border flex justify-between items-center px-2">
+    <div className="w-full h-full border flex justify-between items-center bg-white px-2">
       <a href="/" className="font-logo text-3xl">
         TRAVELUS
       </a>
