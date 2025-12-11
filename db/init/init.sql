@@ -106,6 +106,7 @@ CREATE TABLE trip_events (
     latitude DECIMAL(10, 8),
     longitude DECIMAL(11, 8),
     status event_status NOT NULL DEFAULT 'planned',
+    cost INTEGER DEFAULT 0,
     CONSTRAINT fk_te_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
     CONSTRAINT fk_te_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
