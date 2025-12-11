@@ -41,7 +41,7 @@ export async function searchLocations(query: string): Promise<LocationSuggestion
       `&limit=10`,
       {
         headers: {
-          'User-Agent': 'TravelBuddyApp/1.0' // Nominatim requires User-Agent
+          'User-Agent': 'TravelBuddyApp/1.0' 
         }
       }
     );
