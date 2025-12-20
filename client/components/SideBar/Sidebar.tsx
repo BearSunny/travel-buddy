@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PlanInfo from "./PlanInfo";
-import ViewRouter from "./ViewRouter";
+import PlanInfo from "./planInfo";
+import ViewRouter from "./viewRouter";
 import PlanPicker from "./PlanPicker";
 import { useTrip } from "@/hooks/useTrip";
 import { TripProvider } from "@/context/TripContext";

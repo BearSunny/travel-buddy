@@ -240,13 +240,15 @@ router.post('/create-trip', async (req, res) => {
       if (event.suggestedStartTime) {
         const [hours, minutes] = event.suggestedStartTime.split(':');
         startTime = new Date(eventDate);
-        startTime.setHours(parseInt(hours), parseInt(minutes), 0);
+        // Interpret as UTC+7 (Vietnam timezone)
+        startTime.setUTCHours(parseInt(hours) - 7, parseInt(minutes), 0, 0);
       }
 
       if (event.suggestedEndTime) {
         const [hours, minutes] = event.suggestedEndTime.split(':');
         endTime = new Date(eventDate);
-        endTime.setHours(parseInt(hours), parseInt(minutes), 0);
+        // Interpret as UTC+7 (Vietnam timezone)
+        endTime.setUTCHours(parseInt(hours) - 7, parseInt(minutes), 0, 0);
       }
 
       await client.query(
