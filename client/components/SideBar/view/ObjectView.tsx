@@ -65,6 +65,7 @@ export default function ObjectView() {
     endTime: "",
     cost: "",
     location: "",
+    status: "",
   });
   const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
   const groupedEvents = useMemo(() => {
@@ -163,9 +164,17 @@ export default function ObjectView() {
     }).format(date);
   };
 
+  const statusStyles = {
+    planned: "bg-gray-100 text-gray-600",
+    done: "bg-[#e8f5e9] text-[#38a44f]",
+    cancelled: "bg-[#ffebee] text-[#d32f2f]"
+  };
+  
   useEffect(() => {
     console.log(events);
   })
+
+  const isTripCompleted = activeTrip?.completion_status === 'completed' || activeTrip?.completion_status === 'cancelled';
 
   if (isTripLoading) return <div>Loading Trip...</div>;
   if (isEventsLoading) return <div>Loading {eventIds.length} Events...</div>;
@@ -263,6 +272,11 @@ export default function ObjectView() {
                                 )}`}
                             </span>
                           )}
+                          {e.status && (
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${statusStyles[e.status as keyof typeof statusStyles]}`}>
+                              {e.status}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {e.image && (
@@ -283,11 +297,13 @@ export default function ObjectView() {
         ))}
       </div>
 
-      <div className="pt-2 h-40 mb-10 bg-white bottom-30 border-t border-gray-100">
-        <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
-          Add New Event
-        </h3>
-        <div className="bg-[#f3f4f6] rounded-lg p-2 flex flex-col gap-2 border border-gray-200 shadow-sm">
+      {/* Add New Event Section - Hide for completed trips */}
+      {!isTripCompleted ? (
+        <div className="pt-2 h-40 mb-10 bg-white bottom-30 border-t border-gray-100">
+          <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
+            Add New Event
+          </h3>
+          <div className="bg-[#f3f4f6] rounded-lg p-2 flex flex-col gap-2 border border-gray-200 shadow-sm">
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center text-gray-400 pl-1">
               <svg
@@ -407,6 +423,20 @@ export default function ObjectView() {
           </div>
         </div>
       </div>
+      ) : (
+        <div className="pt-2 mb-10 bg-gray-50 border-t border-gray-200 p-4 rounded-lg">
+          <div className="flex items-center gap-2 text-gray-600">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold">Trip Completed</p>
+              <p className="text-xs text-gray-500">This trip is read-only. Reopen it to make changes.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 5. The Sliding Card Component */}
       <EventCard
@@ -414,6 +444,7 @@ export default function ObjectView() {
         isOpen={!!selectedEventId}
         onClose={() => setSelectedEventId(null)}
         onUpdate={updateEvent}
+        isReadOnly={isTripCompleted}
       />
     </div>
   );

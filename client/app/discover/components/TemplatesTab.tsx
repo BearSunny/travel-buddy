@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDbUser } from "@/context/userContext";
 import { useTemplateRating } from "@/hooks/useTemplateRating";
 import RatingModal from "@/components/templates/RatingModal";
+import TemplatePreviewModal from "@/components/templates/TemplatePreviewModal";
 
 interface Template {
   id: string;
@@ -41,6 +42,10 @@ export default function TemplatesTab() {
   // Rating Modal State
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [templateToRate, setTemplateToRate] = useState<{ id: string; title: string } | null>(null);
+
+  // Preview Modal State
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -128,6 +133,11 @@ export default function TemplatesTab() {
     }
     setTemplateToRate({ id: template.id, title: template.title });
     setShowRatingModal(true);
+  };
+
+  const handlePreviewTemplate = (templateId: string) => {
+    setPreviewTemplateId(templateId);
+    setShowPreviewModal(true);
   };
 
   const handleRatingSubmitted = () => {
@@ -250,6 +260,12 @@ export default function TemplatesTab() {
 
                 <div className="flex gap-2">
                   <button
+                    onClick={() => handlePreviewTemplate(template.id)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold transition-colors"
+                  >
+                    Preview
+                  </button>
+                  <button
                     onClick={() => handleUseTemplate(template)}
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition-colors"
                   >
@@ -349,6 +365,25 @@ export default function TemplatesTab() {
             setTemplateToRate(null);
           }}
           onRatingSubmitted={handleRatingSubmitted}
+        />
+      )}
+
+      {/* Preview Modal */}
+      {showPreviewModal && previewTemplateId && (
+        <TemplatePreviewModal
+          templateId={previewTemplateId}
+          isOpen={showPreviewModal}
+          onClose={() => {
+            setShowPreviewModal(false);
+            setPreviewTemplateId(null);
+          }}
+          onUseTemplate={(template) => {
+            // Close preview modal first
+            setShowPreviewModal(false);
+            setPreviewTemplateId(null);
+            // Then open the use template modal
+            handleUseTemplate(template);
+          }}
         />
       )}
     </div>

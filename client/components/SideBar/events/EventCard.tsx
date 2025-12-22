@@ -9,6 +9,7 @@ interface EventCardProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (id: string, data: Partial<Event>) => Promise<void>;
+  isReadOnly?: boolean;
 }
 
 export default function EventCard({
@@ -16,6 +17,7 @@ export default function EventCard({
   isOpen,
   onClose,
   onUpdate,
+  isReadOnly = false,
 }: EventCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Event>>({});
@@ -99,7 +101,7 @@ export default function EventCard({
                   {isSaving ? "Saving..." : "Save"}
                 </button>
               </>
-            ) : (
+            ) : !isReadOnly && (
               <button
                 onClick={() => setIsEditing(true)}
                 className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 text-sm font-medium rounded-md flex items-center gap-1.5 transition-colors"
@@ -119,6 +121,7 @@ export default function EventCard({
                 data={formData}
                 isEditing={isEditing}
                 onChange={handleChange}
+                isReadOnly={isReadOnly}
               />
               <div className="h-px bg-gray-100 mx-6 my-2" />
               <EventDetails
