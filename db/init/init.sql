@@ -16,6 +16,13 @@ VALUES ('lechihungdo@gmail.com', '123456789', 'Lê Chí Hưng');
 INSERT INTO users (email, password, display_name)
 VALUES ('huynhtanphuc@gmail.com', '987654321', 'Huỳnh Tấn Phúc');
 
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'completion_status') THEN
+        CREATE TYPE completion_status AS ENUM ('planning', 'in_progress', 'completed', 'cancelled');
+    END IF;
+END$$;
+
 CREATE TABLE trips (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id UUID NOT NULL,
@@ -23,6 +30,10 @@ CREATE TABLE trips (
     description TEXT,
     start_date TIMESTAMPTZ,
     end_date TIMESTAMPTZ,
+    completion_status completion_status DEFAULT 'planning',
+    completion_percentage INTEGER DEFAULT 0,
+    completed_at TIMESTAMPTZ,
+    completion_verified BOOLEAN DEFAULT false,
     CONSTRAINT fk_trips_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

@@ -9,9 +9,10 @@ interface PlanCardProps {
   onDelete: (tripId: string) => void;
   onClick: () => void;
   isShared?: boolean;
+  onMarkComplete?: (tripId: string) => void;
 }
 
-export default function PlanCard({ trip, onDelete, onClick, isShared = false }: PlanCardProps) {
+export default function PlanCard({ trip, onDelete, onClick, isShared = false, onMarkComplete }: PlanCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = (e: React.MouseEvent) => {
@@ -26,6 +27,20 @@ export default function PlanCard({ trip, onDelete, onClick, isShared = false }: 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(trip.trip_id || (trip as any).id);
+  };
+
+  const handleMarkComplete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onMarkComplete) {
+      onMarkComplete(trip.trip_id || (trip as any).id);
+    }
+  };
+
+  // Check if trip needs completion
+  const needsCompletion = () => {
+    const hasEnded = trip.end_date ? new Date(trip.end_date) < new Date() : false;
+    const notCompleted = trip.completion_status !== 'completed' && trip.completion_status !== 'cancelled';
+    return hasEnded && notCompleted;
   };
 
   const formatDate = (d: Date | string) => {
@@ -45,7 +60,22 @@ export default function PlanCard({ trip, onDelete, onClick, isShared = false }: 
       className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-4 border border-gray-200"
     >
       <div className="flex items-start justify-between mb-2">
-        <h3 className="font-bold text-gray-900 text-base flex-1">{trip.title}</h3>
+        <div className="flex items-center gap-2 flex-1">
+          <h3 className="font-bold text-gray-900 text-base">{trip.title}</h3>
+          {needsCompletion() && (
+            <button
+              onClick={handleMarkComplete}
+              className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold transition-colors shadow-sm"
+              title="Mark trip as completed"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              Mark as Complete
+            </button>
+          )}
+        </div>
         <div className="flex gap-1 ml-2">
           <button
             onClick={handleShare}

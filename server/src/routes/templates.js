@@ -137,6 +137,44 @@ router.post('/export', async (req, res) => {
     const trip = tripResult.rows[0];
     console.log('[Export Template] Trip found:', trip.title);
 
+    // Check if trip is completed
+    if (trip.completion_status !== 'completed') {
+      console.error('[Export Template] Trip not completed yet. Status:', trip.completion_status);
+      await client.query('ROLLBACK');
+      return res.status(400).json({ 
+        error: 'Only completed trips can be exported as templates. Please mark your trip as completed first.',
+        current_status: trip.completion_status
+      });
+    }
+
+    // Check if trip has minimum completion percentage (at least 50% of events done)
+    if (trip.completion_percentage < 50) {
+      console.error('[Export Template] Trip completion too low:', trip.completion_percentage);
+      await client.query('ROLLBACK');
+      return res.status(400).json({ 
+        error: `Trip must have at least 50% of events completed. Current: ${trip.completion_percentage}%`,
+        completion_percentage: trip.completion_percentage
+      });
+    }
+
+    // Count trip events - require minimum 3 events
+    const eventCountResult = await client.query(
+      'SELECT COUNT(*) as count FROM trip_events WHERE trip_id = $1',
+      [trip_id]
+    );
+    const eventCount = parseInt(eventCountResult.rows[0].count);
+
+    if (eventCount < 3) {
+      console.error('[Export Template] Not enough events:', eventCount);
+      await client.query('ROLLBACK');
+      return res.status(400).json({ 
+        error: 'Trip must have at least 3 events to be exported as a template',
+        event_count: eventCount
+      });
+    }
+
+    console.log('[Export Template] Trip validation passed - Status: completed, Completion: ' + trip.completion_percentage + '%, Events: ' + eventCount);
+
     // Create template
     console.log('[Export Template] Creating template...');
     const templateResult = await client.query(

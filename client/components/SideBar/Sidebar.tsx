@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import PlanInfo from "./planInfo";
 import ViewRouter from "./viewRouter";
 import PlanPicker from "./PlanPicker";
+import TripCompletionModal from "./trip/TripCompletionModal";
 import { useTrip } from "@/hooks/useTrip";
 import { TripProvider } from "@/context/TripContext";
 import { Trip } from "@/interface/Trip";
@@ -18,6 +19,9 @@ export default function Sidebar() {
   const [isLoadingShared, setIsLoadingShared] = useState(false);
   const [sharedTripError, setSharedTripError] = useState<string | null>(null);
   const [hasRefetchedForShared, setHasRefetchedForShared] = useState(false);
+  
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionModalDismissed, setCompletionModalDismissed] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -36,6 +40,27 @@ export default function Sidebar() {
       }, 2000);
     }
   }, []);
+
+  // Check if active trip needs completion modal
+  useEffect(() => {
+    if (!activeTrip || completionModalDismissed) {
+      setShowCompletionModal(false);
+      return;
+    }
+
+    // Check if trip has ended and is not yet marked as completed
+    const tripEndDate = new Date(activeTrip.end_date);
+    const now = new Date();
+    const hasEnded = tripEndDate < now;
+    const needsCompletion = activeTrip.completion_status !== 'completed' && 
+                           activeTrip.completion_status !== 'cancelled';
+    
+    if (hasEnded && needsCompletion) {
+      setShowCompletionModal(true);
+    } else {
+      setShowCompletionModal(false);
+    }
+  }, [activeTripId, completionModalDismissed]);
 
   const fetchSharedTrip = async (tripId: string) => {
     setIsLoadingShared(true);
@@ -191,26 +216,74 @@ export default function Sidebar() {
           />
         ) : (
           // PLAN VIEW
-          <div className="flex flex-col w-full h-full p-4 overflow-y-auto"> 
-            <PlanInfo trip={activeTrip} onBack={() => {
-              setActiveTripId(null);
-              // Clear the map markers by dispatching tripChanged with null
-              if (typeof window !== 'undefined') {
-                const event = new CustomEvent('tripChanged', { detail: null });
-                window.dispatchEvent(event);
-              }
-            }} />
-            <div className="flex-1 overflow-hidden">
-              <TripProvider 
+          <>
+            <div className="flex flex-col w-full h-full p-4 overflow-y-auto"> 
+              <PlanInfo 
                 trip={activeTrip} 
-                isLoading={isLoading}
-                addEventLocal={addEventLocal}
-                removeEventLocal={removeEventLocal}
-              >
-                  <ViewRouter />
-              </TripProvider>
+                onBack={() => {
+                  setActiveTripId(null);
+                  setCompletionModalDismissed(false);
+                  // Clear the map markers by dispatching tripChanged with null
+                  if (typeof window !== 'undefined') {
+                    const event = new CustomEvent('tripChanged', { detail: null });
+                    window.dispatchEvent(event);
+                  }
+                }}
+                onTripUpdate={async () => {
+                  await refetch();
+                  setCompletionModalDismissed(false);
+                }}
+              />
+              <div className="flex-1 overflow-hidden">
+                <TripProvider 
+                  trip={activeTrip} 
+                  isLoading={isLoading}
+                  addEventLocal={addEventLocal}
+                  removeEventLocal={removeEventLocal}
+                >
+                    <ViewRouter />
+                </TripProvider>
+              </div>
             </div>
-          </div>
+
+            {/* Trip Completion Modal */}
+            {showCompletionModal && (
+              <TripCompletionModal
+                trip={activeTrip}
+                onClose={() => {
+                  setShowCompletionModal(false);
+                  setCompletionModalDismissed(true);
+                }}
+                onComplete={async (status, notes) => {
+                  try {
+                    const apiUrl = process.env.APP_API_URL || 'http://localhost:5001';
+                    const tripId = activeTrip.trip_id || (activeTrip as any).id;
+                    
+                    const response = await fetch(`${apiUrl}/api/trips/complete/${tripId}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ completion_status: status, notes })
+                    });
+
+                    if (!response.ok) {
+                      const error = await response.json();
+                      throw new Error(error.error || 'Failed to update trip status');
+                    }
+
+                    // Success - refetch trips to get updated data
+                    await refetch();
+                    setShowCompletionModal(false);
+                    setCompletionModalDismissed(false);
+                    
+                    alert(`Trip marked as ${status}!`);
+                  } catch (error) {
+                    console.error('Error completing trip:', error);
+                    throw error;
+                  }
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </aside>

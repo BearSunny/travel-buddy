@@ -1,14 +1,15 @@
 import React from "react";
 import { Event } from "@/interface/TripEvent";
-import { Calendar, DollarSign, Clock } from "lucide-react";
+import { Calendar, DollarSign, Clock, CheckCircle2 } from "lucide-react";
 
 interface EventInfoProps {
   data: Partial<Event>;
   isEditing: boolean;
   onChange: (field: keyof Event, value: any) => void;
+  isReadOnly?: boolean;
 }
 
-export default function EventInfo({ data, isEditing, onChange }: EventInfoProps) {
+export default function EventInfo({ data, isEditing, onChange, isReadOnly = false }: EventInfoProps) {
   // Helper to format date for input type="datetime-local"
   const toInputDate = (date: Date | string | undefined) => {
     if (!date) return "";
@@ -21,9 +22,18 @@ export default function EventInfo({ data, isEditing, onChange }: EventInfoProps)
 
   return (
     <div className="p-6 pb-2">
+      {/* Read-only notice for completed trips */}
+      {isReadOnly && (
+        <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+          <p className="text-xs text-yellow-800">
+            <strong>Read-only:</strong> This trip is completed. Reopen it to edit events.
+          </p>
+        </div>
+      )}
+      
       {/* Title */}
       <div className="mb-4">
-        {isEditing ? (
+        {isEditing && !isReadOnly ? (
           <input
             type="text"
             value={data.title || ""}
@@ -43,7 +53,7 @@ export default function EventInfo({ data, isEditing, onChange }: EventInfoProps)
         <div className="flex items-start gap-3 text-gray-600">
           <Calendar size={18} className="mt-0.5 text-blue-500 shrink-0" />
           <div className="flex-1">
-            {isEditing ? (
+            {isEditing && !isReadOnly ? (
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold text-gray-400 uppercase">Start</label>
                 <input
@@ -86,7 +96,7 @@ export default function EventInfo({ data, isEditing, onChange }: EventInfoProps)
         <div className="flex items-center gap-3 text-gray-600 mt-1">
           <DollarSign size={18} className="text-green-600 shrink-0" />
           <div className="flex-1">
-            {isEditing ? (
+            {isEditing && !isReadOnly ? (
               <input
                 type="text"
                 value={data.cost || ""}
@@ -97,6 +107,34 @@ export default function EventInfo({ data, isEditing, onChange }: EventInfoProps)
             ) : (
               <span className="text-sm font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">
                 {data.cost || "No cost added"}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Event Status */}
+        <div className="flex items-center gap-3 text-gray-600 mt-3">
+          <CheckCircle2 size={18} className={`shrink-0 ${data.status === 'done' ? 'text-green-600' : 'text-gray-400'}`} />
+          <div className="flex-1">
+            {isEditing && !isReadOnly ? (
+              <select
+                value={data.status || 'planned'}
+                onChange={(e) => onChange("status", e.target.value)}
+                className="text-sm border border-gray-300 rounded px-2 py-1 w-full focus:ring-1 focus:ring-blue-500 outline-none"
+              >
+                <option value="planned">Planned</option>
+                <option value="done">Done ✓</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            ) : (
+              <span className={`text-sm font-medium px-2 py-0.5 rounded ${
+                data.status === 'done' 
+                  ? 'bg-green-50 text-green-700' 
+                  : data.status === 'cancelled'
+                  ? 'bg-red-50 text-red-700'
+                  : 'bg-gray-50 text-gray-700'
+              }`}>
+                {data.status === 'done' ? '✓ Done' : data.status === 'cancelled' ? '✗ Cancelled' : 'Planned'}
               </span>
             )}
           </div>

@@ -7,6 +7,7 @@ import { Icons } from "@/components/ui/Icons";
 import EmptyState from "./trip/EmptyState";
 import PlanCard from "./trip/PlanCard";
 import CreatePlanModal from "./trip/CreatePlanModal";
+import TripCompletionModal from "./trip/TripCompletionModal";
 import { useTrip } from "@/hooks/useTrip";
 import LoginButton from "@/components/NavigationBar/LoginButton";
 
@@ -18,10 +19,11 @@ interface PlanPickerProps {
 
 export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId }: PlanPickerProps) {
   const { user } = useDbUser();
-  const { trips, createTrip, deleteTrip } = useTrip();
+  const { trips, createTrip, deleteTrip, refetch } = useTrip();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completionModalTrip, setCompletionModalTrip] = useState<Trip | null>(null);
 
   // Combine user trips with shared trip
   const allTrips = useMemo(() => {
@@ -79,6 +81,13 @@ export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId
     }
   };
 
+  const handleMarkComplete = (tripId: string) => {
+    const trip = allTrips.find(t => (t.trip_id || (t as any).id) === tripId);
+    if (trip) {
+      setCompletionModalTrip(trip);
+    }
+  };
+
   if (!user) return (  
       <LoginButton />
   );
@@ -122,6 +131,7 @@ export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId
                     onDelete={handleDelete}
                     onClick={() => onSelectTrip(trip)}
                     isShared={isShared}
+                    onMarkComplete={handleMarkComplete}
                   />
                 </div>
                 {(isShared || isHighlighted) && (
@@ -140,6 +150,37 @@ export default function PlanPicker({ onSelectTrip, sharedTrip, highlightedTripId
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleCreate}
           isSubmitting={isSubmitting}
+        />
+      )}
+
+      {completionModalTrip && (
+        <TripCompletionModal
+          trip={completionModalTrip}
+          onClose={() => setCompletionModalTrip(null)}
+          onComplete={async (status, notes) => {
+            try {
+              const apiUrl = process.env.APP_API_URL || 'http://localhost:5001';
+              const tripId = completionModalTrip.trip_id || (completionModalTrip as any).id;
+              
+              const response = await fetch(`${apiUrl}/api/trips/complete/${tripId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completion_status: status, notes })
+              });
+
+              if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to update trip status');
+              }
+
+              await refetch();
+              setCompletionModalTrip(null);
+              alert(`Trip marked as ${status}!`);
+            } catch (error) {
+              console.error('Error completing trip:', error);
+              throw error;
+            }
+          }}
         />
       )}
     </div>
