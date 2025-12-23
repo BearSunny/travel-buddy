@@ -52,10 +52,6 @@ export default function MonthView() {
     setCurrentMonth(format(firstDayNextMonth, 'MMM-yyyy'))
   }
 
-//   let selectedDayMeetings = meetings.filter((meeting) =>
-//     isSameDay(parseISO(meeting.startDatetime), selectedDay)
-//   )
-
   return (
       <div className="px-1">
         <div className="md:grid md:grid-cols-2 md:divide-x md:divide-gray-200">

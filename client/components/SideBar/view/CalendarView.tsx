@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import MonthView from "@/calendar/Calendar";
+import MonthView from "@/calendar/MonthView";
+import WeekView from "@/calendar/WeekView";
 
 export default function CalendarView() {
   return (
@@ -20,6 +21,9 @@ export default function CalendarView() {
     //   </svg>
     //   <p className="text-sm font-medium">Calendar view coming soon</p>
     // </div>
-    <MonthView/>
+    <div className="overflow-y-scroll">
+      <MonthView/>
+      <WeekView/>
+    </div>
   );
 }
