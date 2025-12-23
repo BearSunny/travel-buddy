@@ -12,6 +12,8 @@ import tripsRoutes from './routes/trips.js';
 import tripCollaboratorsRoutes from './routes/trip_collaborators.js';
 import tripEventsRoutes from './routes/trip_events.js';
 import authRoutes from './routes/authRoutes.js';
+import templatesRoutes from './routes/templates.js';
+import aiRoutes from './routes/ai.js';
 import pool from './db.js';
 import { setupCollaborationWS } from './ws/collaboration.js';
 
@@ -51,6 +53,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/trip_collaborators', tripCollaboratorsRoutes);
 app.use('/api/trip_events', tripEventsRoutes);
+app.use('/api/templates', templatesRoutes);
+app.use('/api/ai', aiRoutes);
 
 // API Routes
 app.use('/health', healthRoutes);

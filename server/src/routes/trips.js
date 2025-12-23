@@ -62,7 +62,7 @@ router.get("/read/:id", async (req, res) => {
     }
 
     const result2 = await pool.query(
-      "SELECT id FROM trip_events WHERE trip_id = $1",
+      "SELECT * FROM trip_events WHERE trip_id = $1 ORDER BY start_time",
       values
     );
 
@@ -159,6 +159,82 @@ router.delete("/delete/:id", async (req, res) => {
     return res.status(200).json({ message: "Trip deleted successfully", id });
   } catch (err) {
     console.error("trips DELETE /:id error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Mark trip as completed or cancelled
+router.patch("/complete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { completion_status, notes } = req.body;
+
+    if (!completion_status || !['completed', 'cancelled'].includes(completion_status)) {
+      return res.status(400).json({ error: "Invalid completion_status. Must be 'completed' or 'cancelled'" });
+    }
+
+    // Calculate completion percentage based on event statuses
+    const eventsQuery = await pool.query(
+      `SELECT COUNT(*) as total, 
+       COUNT(CASE WHEN status = 'done' THEN 1 END) as done_count 
+       FROM trip_events WHERE trip_id = $1`,
+      [id]
+    );
+
+    const { total, done_count } = eventsQuery.rows[0];
+    const completion_percentage = total > 0 ? Math.round((done_count / total) * 100) : 0;
+
+    // Update trip
+    const query = `
+      UPDATE trips 
+      SET completion_status = $1, 
+          completion_percentage = $2,
+          completed_at = NOW(),
+          description = CASE 
+            WHEN $3::TEXT IS NOT NULL AND $3::TEXT != '' 
+            THEN CONCAT(COALESCE(description, ''), E'\\n\\n', 'Final Notes: ', $3::TEXT)
+            ELSE description
+          END
+      WHERE id = $4
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, [completion_status, completion_percentage, notes, id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("trips PATCH /complete/:id error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /trips/reopen/:id - Reopen a completed trip
+router.patch("/reopen/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Update trip back to in_progress status
+    const query = `
+      UPDATE trips 
+      SET completion_status = 'in_progress',
+          completed_at = NULL
+      WHERE id = $1
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("trips PATCH /reopen/:id error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

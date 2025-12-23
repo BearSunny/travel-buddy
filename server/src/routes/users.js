@@ -30,8 +30,13 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Get trips owned by the user AND trips they're collaborating on
     const result2 = await pool.query(
-      'SELECT id FROM trips where owner_id = $1',
+      `SELECT DISTINCT t.id, t.owner_id, t.title, t.description, t.start_date, t.end_date
+       FROM trips t
+       LEFT JOIN trip_collaborators tc ON t.id = tc.trip_id
+       WHERE t.owner_id = $1 OR (tc.user_id = $1 AND tc.status = 'accepted')
+       ORDER BY t.title`,
       [id]
     );
 

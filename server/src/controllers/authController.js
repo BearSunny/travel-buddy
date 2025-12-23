@@ -9,7 +9,7 @@ export const syncUser = async (req, res) => {
       return res.status(400).json({ error: 'Missing required Auth0 user data' });
     }
 
-    console.log('Syncing user:', { auth0_id, email, display_name, avatar });
+    // console.log('Syncing user:', { auth0_id, email, display_name, avatar });
 
     // Handle duplicates automatically --> Race condition omg --> Why does Auth0 have to send 2 requests at the same time
     const result = await pool.query(
