@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import TemplatesTab from "./components/TemplatesTab";
-import AITab from "./components/AITab";
 import YourPlansTab from "./components/YourPlansTab";
 
-type TabType = "templates" | "ai" | "yourplans";
+type TabType = "templates" | "yourplans";
 
 export default function DiscoverPage() {
   const [activeTab, setActiveTab] = useState<TabType>("templates");
@@ -39,16 +38,6 @@ export default function DiscoverPage() {
               Templates
             </button>
             <button
-              onClick={() => setActiveTab("ai")}
-              className={`py-4 font-semibold text-sm transition-colors border-b-2 ${
-                activeTab === "ai"
-                  ? "text-gray-900 border-blue-600"
-                  : "text-gray-500 border-transparent hover:text-gray-700"
-              }`}
-            >
-              AI Planner
-            </button>
-            <button
               onClick={() => setActiveTab("yourplans")}
               className={`py-4 font-semibold text-sm transition-colors border-b-2 ${
                 activeTab === "yourplans"
@@ -66,7 +55,6 @@ export default function DiscoverPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-8 py-12">
           {activeTab === "templates" && <TemplatesTab />}
-          {activeTab === "ai" && <AITab />}
           {activeTab === "yourplans" && <YourPlansTab />}
         </div>
       </div>
