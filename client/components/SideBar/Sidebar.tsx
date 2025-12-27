@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import PlanInfo from "./planInfo";
-import ViewRouter from "./viewRouter";
+import ViewRouter from "./ViewRouter";
 import PlanPicker from "./PlanPicker";
 import TripCompletionModal from "./trip/TripCompletionModal";
 import { useTrip } from "@/hooks/useTrip";

@@ -30,7 +30,7 @@ interface AIItinerary {
 export default function AITab() {
   const router = useRouter();
   const { user } = useDbUser();
-  
+
   const [formData, setFormData] = useState<PlanFormData>({
     destination: "",
     duration: 3,
@@ -38,14 +38,18 @@ export default function AITab() {
     interests: "",
     budget: "moderate",
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [itinerary, setItinerary] = useState<AIItinerary | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -134,7 +138,7 @@ export default function AITab() {
 
   const groupEventsByDay = (events: AIEvent[]) => {
     const grouped: { [day: number]: AIEvent[] } = {};
-    events.forEach(event => {
+    events.forEach((event) => {
       if (!grouped[event.dayNumber]) {
         grouped[event.dayNumber] = [];
       }
@@ -145,24 +149,17 @@ export default function AITab() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">AI Trip Planner</h2>
-        <p className="text-gray-600 mt-2 text-sm">Describe your ideal trip and let AI create a personalized itinerary</p>
-      </div>
-
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 rounded-lg text-sm">
           {error}
         </div>
       )}
 
-      <div className="max-w-2xl bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <form onSubmit={handleGeneratePlan} className="space-y-6">
+      <div className="max-w-2xl bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        <form onSubmit={handleGeneratePlan} className="space-y-1">
           {/* Destination */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Destination <span className="text-red-500">*</span>
-            </label>
+            <label className="text-xs text-gray-500 mb-1">Destination</label>
             <input
               type="text"
               name="destination"
@@ -176,8 +173,8 @@ export default function AITab() {
 
           {/* Duration */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Duration (days) <span className="text-red-500">*</span>
+            <label className="text-xs text-gray-500 mb-1">
+              Duration (Days)
             </label>
             <input
               type="number"
@@ -193,9 +190,7 @@ export default function AITab() {
 
           {/* Start Date */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Start Date <span className="text-red-500">*</span>
-            </label>
+            <label className="text-xs text-gray-500 mb-1">Start Date</label>
             <input
               type="date"
               name="startDate"
@@ -208,9 +203,7 @@ export default function AITab() {
 
           {/* Budget */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Budget Level
-            </label>
+            <label className="text-xs text-gray-500 mb-1">Budget Level</label>
             <select
               name="budget"
               value={formData.budget}
@@ -225,7 +218,7 @@ export default function AITab() {
 
           {/* Interests */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="text-xs text-gray-500 mb-1">
               Interests & Preferences (Optional)
             </label>
             <textarea
@@ -250,9 +243,7 @@ export default function AITab() {
                 Generating Your Perfect Trip...
               </>
             ) : (
-              <>
-                ✨ Generate AI Trip Plan
-              </>
+              <>Generate AI Trip Plan</>
             )}
           </button>
         </form>
@@ -263,32 +254,48 @@ export default function AITab() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">{itinerary.title}</h2>
-              <p className="text-gray-600 mt-2 text-sm">{itinerary.description}</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {itinerary.title}
+              </h2>
+              <p className="text-gray-600 mt-2 text-sm">
+                {itinerary.description}
+              </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
-              {Object.entries(groupEventsByDay(itinerary.events)).map(([day, events]) => (
-                <div key={day} className="mb-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 sticky top-0 bg-white py-2">
-                    Day {day}
-                  </h3>
-                  <div className="space-y-3">
-                    {events.map((event, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">{event.title}</h4>
-                          <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                            {event.suggestedStartTime} - {event.suggestedEndTime}
-                          </span>
+            <div className="flex-1 overflow-y-auto px-6">
+              {Object.entries(groupEventsByDay(itinerary.events)).map(
+                ([day, events]) => (
+                  <div key={day} className="mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 sticky top-0 bg-white py-2">
+                      Day {day}
+                    </h3>
+                    <div className="space-y-3">
+                      {events.map((event, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-gray-900">
+                              {event.title}
+                            </h4>
+                            <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                              {event.suggestedStartTime} -{" "}
+                              {event.suggestedEndTime}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {event.description}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            📍 {event.location}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{event.description}</p>
-                        <p className="text-xs text-gray-500">📍 {event.location}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
 
             <div className="p-6 border-t border-gray-200 flex gap-3">
