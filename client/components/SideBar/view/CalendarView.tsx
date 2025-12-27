@@ -1,10 +1,14 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 import MonthView from "@/calendar/MonthView";
 import WeekView from "@/calendar/WeekView";
+import AddEventForm from "@/calendar/AddEventForm";
 
 export default function CalendarView() {
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+
   return (
     // <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-4">
     //   <svg
@@ -21,9 +25,16 @@ export default function CalendarView() {
     //   </svg>
     //   <p className="text-sm font-medium">Calendar view coming soon</p>
     // </div>
-    <div className="overflow-y-scroll">
-      <MonthView/>
-      <WeekView/>
+    // <div className="relative overflow-y-scroll">
+    <div className="relative">
+      {/* <MonthView
+        selectedDate={currentDate}
+        onDateSelect={setCurrentDate}
+      /> */}
+      <WeekView
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+      />
     </div>
   );
 }
