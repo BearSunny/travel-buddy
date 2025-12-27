@@ -43,7 +43,7 @@ export default function CreatePlanModal({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden z-10">

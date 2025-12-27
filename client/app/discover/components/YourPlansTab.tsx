@@ -65,7 +65,7 @@ export default function YourPlansTab() {
   }, [user]);
 
   const handleViewTrip = (tripId: string) => {
-    router.push(`/?trip=${tripId}`);
+    router.push(`/plans/?trip=${tripId}`);
   };
 
   const handleDeleteTrip = async (tripId: string) => {

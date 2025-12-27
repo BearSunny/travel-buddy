@@ -152,7 +152,7 @@ export default function Map({ events = [] }: MapProps) {
   return (
     <div className="relative h-full w-full">
       {showToast && (
-        <div className="absolute top-5 right-5 z-[1000] bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+        <div className="absolute top-5 right-5 z-[500] bg-red-500 text-white px-4 py-2 rounded shadow-lg">
           {showToast}
         </div>
       )}
@@ -232,7 +232,7 @@ export default function Map({ events = [] }: MapProps) {
         })}
 
         <ZoomControl position="bottomright" />
-        <div className="absolute top-4 left-4 z-[1000] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
+        <div className="absolute top-4 left-4 z-[500] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
           <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
             
             {/* The Search Bar (Grows on desktop) */}

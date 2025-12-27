@@ -21,6 +21,7 @@ export default function TripCompletionModal({
 
   const calculateCompletionStats = () => {
     const totalEvents = trip.events?.length || 0;
+    console.log(trip);
     const doneEvents = trip.events?.filter((e) => e.status === 'done').length || 0;
     const cancelledEvents = trip.events?.filter((e) => e.status === 'cancelled').length || 0;
     
@@ -48,7 +49,7 @@ export default function TripCompletionModal({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-1000 p-4"
       onClick={(e) => {
         // Prevent clicks from reaching components underneath
         e.stopPropagation();

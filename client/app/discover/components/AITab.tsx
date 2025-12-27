@@ -127,7 +127,7 @@ export default function AITab() {
       }
 
       const newTrip = await response.json();
-      router.push(`/?trip=${newTrip.id}`);
+      router.push(`/plans/?trip=${newTrip.id}`);
     } catch (err) {
       console.error("Create trip error:", err);
       setError(err instanceof Error ? err.message : "Failed to create trip");
