@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMemo } from 'react';
 import { 
   format, 
@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, ArrowDown } from 'lucide-react';
 import { Event } from '@/interface/TripEvent';
 import { useTripContext } from '@/context/TripContext';
 import { useEvents } from '@/hooks/useTripEvents';
+import EventCard from '@/components/SideBar/events/EventCard';
 
 // const imgSearch = "https://www.figma.com/api/mcp/asset/4cb6dfdd-eddf-4be7-bdb3-e224ea1db92a";
 
@@ -44,13 +45,13 @@ function Column({ className, weekend = false }: ColumnProps) {
   const slots = [];
   for ( let i = 0; i < 24; i++ ) {
     slots.push(
-      <Slot className={ "border border-[#dadce0] border-solid flex-[1_0_0] min-h-px min-w-px w-full h-[50px] bg-white" } />
+      <Slot key={i} className={ "border border-[#dadce0] border-solid flex-[1_0_0] min-h-px min-w-px w-full h-[50px] bg-white" } />
     );
   }
   const weekendSlots = [];
   for ( let j = 0; j < 24; j++ ) {
     weekendSlots.push(
-      <Slot className={ "border border-[#dadce0] border-solid flex-[1_0_0] min-h-px min-w-px w-full h-[50px] bg-[#f2f2f2]" } weekend={true} />
+      <Slot key={j} className={ "border border-[#dadce0] border-solid flex-[1_0_0] min-h-px min-w-px w-full h-[50px] bg-[#f2f2f2]" } weekend={true} />
     );
   }
 
@@ -90,7 +91,7 @@ type LabelLeftGroupProps = {
 function LabelLeftGroup({ className }: LabelLeftGroupProps) {
   const labels = [];
   for ( let h = 0; h < 24; h++ ) {
-    labels.push(<LabelType className="content-stretch flex flex-[1_0_0] flex-col items-center min-h-px min-w-px px-[10px] py-0 relative shrink-0" time={h} />);
+    labels.push(<LabelType key={h} className="content-stretch flex flex-[1_0_0] flex-col items-center min-h-px min-w-px px-[10px] py-0 relative shrink-0" time={h} />);
   }
 
   return (
@@ -143,9 +144,14 @@ const getEventStyle = (start: Date, end: Date, dayOfWeek: number) => {
   };
 };
 
-function EventCard( {className, event}: EventProps ) {
+function EventSlot( {className, event}: EventProps ) {
   return (
-    <div className={className} data-name="Event" data-node-id="207:2703">
+    <div className={
+        className + (event.status === 'done' ? ' bg-[#55d28f] border-[#3ba86e]' : ' bg-[#f5a623] border-[#d48806]')
+      } 
+      data-name="Event" 
+      data-node-id="207:2703"
+    >
       <div className="content-stretch flex gap-[4px] flex-col items-start relative shrink-0 w-full" data-name="name time container" data-node-id="I207:2703;21:154376">
 
         {/* Event Title */}
@@ -153,7 +159,7 @@ function EventCard( {className, event}: EventProps ) {
           <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="name" data-node-id="I207:2703;21:154379">
             <div className="flex flex-col font-[sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[11px] text-black w-[100%]" data-node-id="I207:2703;21:154379;2:85526">
               <p className="leading-[normal] whitespace-nowrap">
-                {event.title.slice(0, 7) + '...'}
+                {event.title.slice(0, 7) + (event.title.length > 7 ? '...' : '')}
               </p>
             </div>
           </div>
@@ -198,6 +204,26 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
     onDateChange(startOfWeek(addWeeks(currentDate, 1), { weekStartsOn: 0 }));
   };
 
+  // 'Now' Indicator 
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getCurrentTimeTop = (now: Date, dayOfWeek: number) => {
+    const startOfDayDate = startOfDay(now);
+    const minutesPassed = differenceInMinutes(now, startOfDayDate);
+    return {
+      top: `${minutesPassed * PIXELS_PER_MINUTE}px`,
+      left: `${dayOfWeek * 57 + 50}px`
+    }
+  };
+
+  // Today Button 
+  const handleToday = () => { onDateChange(new Date()); };
+
   const {
     activeTrip,
     eventIds,
@@ -209,8 +235,6 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
   const {
     events,
     isLoading: isEventsLoading,
-    createEvent,
-    deleteEvent,
     updateEvent,
   } = useEvents(eventIds, (action, payload) => {
     if (!activeTrip) return;
@@ -221,6 +245,15 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
       addEventLocal(activeTrip.trip_id, payload);
     }
   });
+
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+  const selectedEvent = useMemo(
+    () => events.find((e) => e.id === selectedEventId) || null,
+    [events, selectedEventId]
+  );
+
+  const isTripCompleted = activeTrip?.completion_status === 'completed' || activeTrip?.completion_status === 'cancelled';
 
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
@@ -244,6 +277,14 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
 
     return groups;
   }, [events]);
+
+  // My Plan Button 
+  const handleMyPlan = () => {
+    if ( !events || events.length === 0 ) return;
+    const startTime = events.map(e => new Date(e.start_time).getTime());
+    const firstEventTime = new Date(Math.min(...startTime));
+    onDateChange(firstEventTime);
+  }
 
   return (
     <div className="content-stretch flex flex-col items-center justify-start pl-px pr-0 py-0 relative h-[420px] pt-2" data-name="WeekView" data-node-id="206:1986">
@@ -276,6 +317,22 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
               </p>
             </div>
           </div>
+        </div>
+        <div className="content-stretch flex items-center relative shrink-0" data-name="Right Content">
+          {/* My Plan Button */}
+          <button
+            onClick={handleMyPlan}
+            className="rounded-md border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 active:bg-gray-100 mr-2"
+          >
+            My Plan
+          </button>
+          {/* Today Button */}
+          <button 
+            onClick={handleToday}
+            className="rounded-md border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+          >
+            Today
+          </button>
         </div>
       </div>
       {/* --- Weekday Headers --- */}
@@ -314,8 +371,23 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
           const dateKey = format(day, 'yyyy-MM-dd');
           const dayOfWeek = day.getDay();
           const dayEvents = groupedEvents[dateKey] || [];
+          const isToday = isSameDay(day, now);
+
           return (
-            <div key={day.toISOString()}>
+            <div key={day.toISOString()} >
+              {/* 'Now' Indicator */}
+              { isToday && (
+                <div 
+                  className="absolute left-[50px] right-0 z-20 flex items-center"
+                  style={getCurrentTimeTop(now, dayOfWeek)}
+                >
+                  {/* The Red Dot (pulled left to sit on the border) */}
+                  <div className="absolute -left-1.5 h-3 w-3 rounded-full bg-red-500 shadow-sm ring-2 ring-white" />
+                  {/* The Red Line */}
+                  <div className="h-[2px] w-[57px] bg-red-500 shadow-[0_1px_3px_rgba(239,68,68,0.4)]" />
+                </div>
+              )}
+              {/* Render Events */}
               {dayEvents.map((event) => {
                 const style = getEventStyle(new Date(event.start_time), new Date(event.end_time), dayOfWeek);
                 return (
@@ -323,15 +395,24 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
                     key={event.id}
                     className="absolute"
                     style={style}
+                    onClick={() => setSelectedEventId(event.id)}
                   >
-                    <EventCard event={event} className="h-full absolute bg-[#55d28f] border border-[#3ba86e] border-solid content-stretch flex flex-col gap-[4px] items-start p-[4px] rounded-[3px] w-[57px]" />
-                  </div>
+                    <EventSlot event={event} className="h-full absolute border border-solid content-stretch flex flex-col gap-[4px] items-start p-[4px] rounded-[3px] w-[57px] cursor-pointer" />
+                  </div> 
                 );
               })}
             </div>
           )
         })}
       </div>
+
+      <EventCard
+        event={selectedEvent}
+        isOpen={!!selectedEventId}
+        onClose={() => setSelectedEventId(null)}
+        onUpdate={updateEvent}
+        isReadOnly={isTripCompleted}
+      />
     </div>
   );
 }
