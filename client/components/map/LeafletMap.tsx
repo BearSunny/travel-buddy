@@ -232,7 +232,7 @@ export default function Map({ events = [] }: MapProps) {
         })}
 
         <ZoomControl position="bottomright" />
-        <div className="absolute top-4 left-4 z-[500] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
+        <div className="sticky top-4 left-4 z-[500] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
           <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
             
             {/* The Search Bar (Grows on desktop) */}

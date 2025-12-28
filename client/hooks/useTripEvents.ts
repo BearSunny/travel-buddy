@@ -22,11 +22,26 @@ interface CreateEventData {
   distance?: string;
 }
 
+const toGMT7 = (dateInput: string | Date | undefined): string | undefined => {
+  if (!dateInput) return undefined;
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return undefined;
+  const gmt7Time = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return gmt7Time.toISOString().replace("Z", "");
+};
+
 const batchFetcher = async (...args: (string | string[])[]) => {
   const urls = (Array.isArray(args[0]) ? args[0] : args) as string[];
   if (urls.length === 0) return [];
+
   const promises = urls.map((url) => fetch(url).then((res) => res.json()));
-  return Promise.all(promises);
+  const rawEvents = await Promise.all(promises);
+
+  return rawEvents.map((event: any) => ({
+    ...event,
+    start_time: toGMT7(event.start_time),
+    end_time: toGMT7(event.end_time),
+  }));
 };
 
 export function useEvents(
@@ -37,15 +52,22 @@ export function useEvents(
   ) => void
 ) {
   const { user } = useDbUser();
-  
-  let broadcastEventChange: ((type: 'event_added' | 'event_updated' | 'event_deleted', eventData: any) => void) | undefined;
+
+  let broadcastEventChange:
+    | ((
+        type: "event_added" | "event_updated" | "event_deleted",
+        eventData: any
+      ) => void)
+    | undefined;
   try {
     const tripContext = useTripContext();
     broadcastEventChange = tripContext.broadcastEventChange;
   } catch (e) {
-    console.warn('[useTripEvents] TripContext not available, event broadcasting disabled');
+    console.warn(
+      "[useTripEvents] TripContext not available, event broadcasting disabled"
+    );
   }
-  
+
   const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
   const endpoint = `${apiUrl}/api/trip_events`;
 
@@ -84,7 +106,7 @@ export function useEvents(
       if (onEventsChange) onEventsChange("create", newEvent);
 
       if (broadcastEventChange) {
-        broadcastEventChange('event_added', newEvent);
+        broadcastEventChange("event_added", newEvent);
       }
 
       return newEvent;
@@ -99,7 +121,7 @@ export function useEvents(
       // 1. Optimistic Update
       await mutate((currentEvents) => {
         if (!currentEvents) return [];
-        return currentEvents.map((e) => 
+        return currentEvents.map((e) =>
           e.id === eventId ? { ...e, ...updates } : e
         );
       }, false);
@@ -115,12 +137,12 @@ export function useEvents(
       const updatedEvent = await response.json();
 
       // 3. Re-validate to ensure data consistency
-      await mutate(); 
+      await mutate();
 
       if (onEventsChange) onEventsChange("update", updatedEvent);
 
       if (broadcastEventChange) {
-        broadcastEventChange('event_updated', updatedEvent);
+        broadcastEventChange("event_updated", updatedEvent);
       }
 
       return updatedEvent;
@@ -144,7 +166,7 @@ export function useEvents(
       if (onEventsChange) onEventsChange("delete", id);
 
       if (broadcastEventChange) {
-        broadcastEventChange('event_deleted', id);
+        broadcastEventChange("event_deleted", id);
       }
     } catch (err) {
       console.error(err);

@@ -10,17 +10,39 @@ import EventCard from "../events/EventCard"; // Import the new component
 import LocationAutocomplete from "@/components/map/LocationAutocomplete";
 import { GeocodedLocation } from "@/utils/geocoding";
 
+// const formatTime = (date: Date | string) => {
+//   const d = new Date(date);
+//   return isNaN(d.getTime())
+//     ? ""
+//     : new Intl.DateTimeFormat("en-GB", {
+//         hour: "2-digit",
+//         minute: "2-digit",
+//         hour12: false,
+//         timeZone: "Asia/Ho_Chi_Minh",
+//       }).format(d);
+// };
 const formatTime = (date: Date | string) => {
-  const d = new Date(date);
-  return isNaN(d.getTime())
-    ? ""
-    : new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Ho_Chi_Minh",
-      }).format(d);
+  return new Date(date || "").toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
+
+function toISOStringVietnam(date = new Date()) {
+  // 1. Define the offset for Vietnam (UTC+7) in milliseconds
+  // 7 hours * 60 minutes * 60 seconds * 1000 milliseconds
+  const TZ_OFFSET_HOURS = 7;
+  const offsetMs = TZ_OFFSET_HOURS * 60 * 60 * 1000;
+
+  // 2. Create a new Date object shifted by the offset
+  // We add the offset to the UTC timestamp
+  const shiftedDate = new Date(date.getTime() + offsetMs);
+
+  // 3. Generate the ISO string and replace the trailing 'Z' with '+07:00'
+  // Note: We use the shifted date, so the time numbers are correct for Vietnam,
+  // but toISOString still thinks it is UTC, so we must manually fix the suffix.
+  return shiftedDate.toISOString().replace('Z', '+07:00');
+}
 
 export default function ObjectView() {
   const {
@@ -71,6 +93,7 @@ export default function ObjectView() {
     useState<GeocodedLocation | null>(null);
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
+    console.log("To be sorted events:", events)
     const sorted = [...events].sort(
       (a, b) =>
         new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
@@ -82,8 +105,10 @@ export default function ObjectView() {
         d.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
       );
       const dateKey = !isNaN(vnDate.getTime())
-        ? vnDate.toISOString().split("T")[0]
+        ? toISOStringVietnam(vnDate).split("T")[0]
         : "Unscheduled";
+
+        console.log(vnDate.toISOString(), "Waaaaa: ", dateKey)
 
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(event);
@@ -94,6 +119,7 @@ export default function ObjectView() {
 
   const handleInputChange = (field: string, value: string) => {
     setNewEvent((prev) => ({ ...prev, [field]: value }));
+    console.log(field, value, newEvent);
   };
 
   const handleAdd = async () => {
@@ -172,7 +198,7 @@ export default function ObjectView() {
   };
 
   useEffect(() => {
-    console.log(events);
+    console.log(groupedEvents);
   });
 
   const isTripCompleted =
