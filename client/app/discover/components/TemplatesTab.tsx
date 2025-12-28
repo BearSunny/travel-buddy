@@ -115,7 +115,7 @@ export default function TemplatesTab() {
       trackTemplateUsage(selectedTemplate.id, selectedTemplate.title, newTrip.id);
       
       // Navigate to the new trip
-      router.push(`/?trip=${newTrip.id}`);
+      router.push(`/plans/?trip=${newTrip.id}`);
     } catch (error) {
       console.error("Create trip error:", error);
       alert("Failed to create trip from template. Please try again.");

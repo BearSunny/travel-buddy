@@ -11,7 +11,7 @@ import LocationAutocomplete from "@/components/map/LocationAutocomplete";
 import { GeocodedLocation } from "@/utils/geocoding";
 
 const formatTime = (date: Date | string) => {
-  const d = new Date(date); 
+  const d = new Date(date);
   return isNaN(d.getTime())
     ? ""
     : new Intl.DateTimeFormat("en-GB", {
@@ -29,7 +29,7 @@ export default function ObjectView() {
     isLoading: isTripLoading,
     removeEventLocal,
     addEventLocal,
-  } = useTripContext(); 
+  } = useTripContext();
 
   const {
     events,
@@ -67,7 +67,8 @@ export default function ObjectView() {
     location: "",
     status: "",
   });
-  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] =
+    useState<GeocodedLocation | null>(null);
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
     const sorted = [...events].sort(
@@ -167,14 +168,16 @@ export default function ObjectView() {
   const statusStyles = {
     planned: "bg-gray-100 text-gray-600",
     done: "bg-[#e8f5e9] text-[#38a44f]",
-    cancelled: "bg-[#ffebee] text-[#d32f2f]"
+    cancelled: "bg-[#ffebee] text-[#d32f2f]",
   };
-  
+
   useEffect(() => {
     console.log(events);
-  })
+  });
 
-  const isTripCompleted = activeTrip?.completion_status === 'completed' || activeTrip?.completion_status === 'cancelled';
+  const isTripCompleted =
+    activeTrip?.completion_status === "completed" ||
+    activeTrip?.completion_status === "cancelled";
 
   if (isTripLoading) return <div>Loading Trip...</div>;
   if (isEventsLoading) return <div>Loading {eventIds.length} Events...</div>;
@@ -200,7 +203,7 @@ export default function ObjectView() {
         {Object.entries(groupedEvents).map(([dateKey, groupEvents]) => (
           <div key={dateKey} className="mb-2">
             <div className="flex items-center gap-2 top-0 bg-white z-10 py-2">
-              <Icons.Calendar/>
+              <Icons.Calendar />
               <h2 className="text-lg font-bold text-gray-900 capitalize">
                 {formatGroupHeader(dateKey)}
               </h2>
@@ -224,12 +227,13 @@ export default function ObjectView() {
                     </div>
 
                     {/* 4. Make this clickable and add visual feedback for selection */}
-                    <div 
+                    <div
                       onClick={() => setSelectedEventId(e.id)}
                       className={`
                         rounded-xl p-3 flex gap-3 shadow-sm transition-all relative group border cursor-pointer
-                        ${isSelected 
-                            ? "bg-blue-50 border-blue-400 ring-1 ring-blue-400 shadow-md" 
+                        ${
+                          isSelected
+                            ? "bg-blue-50 border-blue-400 ring-1 ring-blue-400 shadow-md"
                             : "bg-[#f3f4f6] border-transparent hover:border-gray-200 hover:shadow-md"
                         }
                       `}
@@ -259,9 +263,13 @@ export default function ObjectView() {
                           </button>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {e.cost && (
+                          {e.cost > 0 ? (
                             <span className="bg-[#e3f2fd] text-[#1e88e5] text-[10px] font-semibold px-2 py-0.5 rounded">
                               {e.cost}
+                            </span>
+                          ) : (
+                            <span className="bg-[#e3f2fd] text-[#1e88e5] text-[10px] font-semibold px-2 py-0.5 rounded">
+                              free
                             </span>
                           )}
                           {(e.start_time || e.timeRange) && (
@@ -273,7 +281,13 @@ export default function ObjectView() {
                             </span>
                           )}
                           {e.status && (
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${statusStyles[e.status as keyof typeof statusStyles]}`}>
+                            <span
+                              className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                                statusStyles[
+                                  e.status as keyof typeof statusStyles
+                                ]
+                              }`}
+                            >
                               {e.status}
                             </span>
                           )}
@@ -304,135 +318,148 @@ export default function ObjectView() {
             Add New Event
           </h3>
           <div className="bg-[#f3f4f6] rounded-lg p-2 flex flex-col gap-2 border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center text-gray-400 pl-1">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-            </div>
-            <input
-              type="date"
-              className="bg-transparent text-xs font-medium text-gray-700 focus:outline-none cursor-pointer"
-              value={newEvent.date}
-              onChange={(e) => handleInputChange("date", e.target.value)}
-            />
-            <div className="h-4 w-px bg-gray-300 mx-1"></div>
-            <input
-              type="text"
-              placeholder="What are we doing?"
-              className="bg-transparent text-xs font-medium text-gray-700 placeholder-gray-500 flex-1 focus:outline-none min-w-[80px]"
-              value={newEvent.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
-            <div className="flex items-center justify-center text-gray-400 pl-1">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <LocationAutocomplete
-                value={newEvent.location}
-                onChange={(value, location) => {
-                  handleInputChange("location", value);
-                  setSelectedLocation(location);
-                }}
-                placeholder="Where?"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
-            <div className="flex items-center gap-1">
-              <input
-                type="time"
-                className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
-                value={newEvent.startTime}
-                onChange={(e) => handleInputChange("startTime", e.target.value)}
-              />
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="gray"
-                strokeWidth="2"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-              <input
-                type="time"
-                className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
-                value={newEvent.endTime}
-                onChange={(e) => handleInputChange("endTime", e.target.value)}
-              />
-            </div>
-            <div className="h-4 w-px bg-gray-300 mx-1"></div>
-            <div className="flex items-center gap-1 text-gray-500 flex-1">
-              <div className="w-3 h-3 rounded-full border border-gray-400 flex items-center justify-center text-[8px]">
-                $
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center text-gray-400 pl-1">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
               </div>
               <input
+                type="date"
+                className="bg-transparent text-xs font-medium text-gray-700 focus:outline-none cursor-pointer"
+                value={newEvent.date}
+                onChange={(e) => handleInputChange("date", e.target.value)}
+              />
+              <div className="h-4 w-px bg-gray-300 mx-1"></div>
+              <input
                 type="text"
-                placeholder="Cost"
-                className="bg-transparent text-[10px] w-full focus:outline-none placeholder-gray-400"
-                value={newEvent.cost}
-                onChange={(e) => handleInputChange("cost", e.target.value)}
+                placeholder="What are we doing?"
+                className="bg-transparent text-xs font-medium text-gray-700 placeholder-gray-500 flex-1 focus:outline-none min-w-[80px]"
+                value={newEvent.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
               />
             </div>
-            <button
-              onClick={handleAdd}
-              className="ml-auto px-4 py-1 bg-[#4caf50] hover:bg-green-600 rounded text-white text-xs font-bold flex items-center gap-1 transition-colors"
-            >
-              Add
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
+              <div className="flex items-center justify-center text-gray-400 pl-1">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <LocationAutocomplete
+                  value={newEvent.location}
+                  onChange={(value, location) => {
+                    handleInputChange("location", value);
+                    setSelectedLocation(location);
+                  }}
+                  placeholder="Where?"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
+              <div className="flex items-center gap-1">
+                <input
+                  type="time"
+                  className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
+                  value={newEvent.startTime}
+                  onChange={(e) =>
+                    handleInputChange("startTime", e.target.value)
+                  }
+                />
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="gray"
+                  strokeWidth="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+                <input
+                  type="time"
+                  className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
+                  value={newEvent.endTime}
+                  onChange={(e) => handleInputChange("endTime", e.target.value)}
+                />
+              </div>
+              <div className="h-4 w-px bg-gray-300 mx-1"></div>
+              <div className="flex items-center gap-1 text-gray-500 flex-1">
+                <div className="w-3 h-3 rounded-full border border-gray-400 flex items-center justify-center text-[8px]">
+                  $
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cost"
+                  className="bg-transparent text-[10px] w-full focus:outline-none placeholder-gray-400"
+                  value={newEvent.cost}
+                  onChange={(e) => handleInputChange("cost", e.target.value)}
+                />
+              </div>
+              <button
+                onClick={handleAdd}
+                className="ml-auto px-4 py-1 bg-[#4caf50] hover:bg-green-600 rounded text-white text-xs font-bold flex items-center gap-1 transition-colors"
               >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </button>
+                Add
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       ) : (
         <div className="pt-2 mb-10 bg-gray-50 border-t border-gray-200 p-4 rounded-lg">
           <div className="flex items-center gap-2 text-gray-600">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
               <path d="M12 6v6l4 2" />
             </svg>
             <div>
               <p className="text-sm font-semibold">Trip Completed</p>
-              <p className="text-xs text-gray-500">This trip is read-only. Reopen it to make changes.</p>
+              <p className="text-xs text-gray-500">
+                This trip is read-only. Reopen it to make changes.
+              </p>
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ import { TripProvider } from "@/context/TripContext";
 import { Trip } from "@/interface/Trip";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);  
+  const [isOpen, setIsOpen] = useState(true);  
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
   const { trips, isLoading, addEventLocal, removeEventLocal, refetch } = useTrip();
   

@@ -13,12 +13,12 @@ export default function NavigationBar() {
         <a href="/" className="text-xl">
           Home
         </a>
-        <a href="/discover" className="text-xl">
-          Discover
+        <a href="/plans" className="text-xl">
+          Plans
         </a>
-        <a href="/faq" className="text-xl">
+        {/* <a href="/faq" className="text-xl">
           FAQ
-        </a>
+        </a> */}
         <Profile />
       </div>
     </div>

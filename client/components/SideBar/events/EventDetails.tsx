@@ -85,7 +85,7 @@ export default function EventDetails({ data, isEditing, onChange }: EventDetails
        {/* Image Section */}
        <div className="space-y-3">
         <div className="flex items-center gap-2 text-gray-800 font-semibold text-sm">
-          <ImageIcon size={16} /> Cover Image
+          <ImageIcon size={16} /> Image
         </div>
         <div className="pl-6">
           {isEditing ? (

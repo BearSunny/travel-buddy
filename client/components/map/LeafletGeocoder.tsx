@@ -130,7 +130,7 @@ export default function LeafletGeocoder() {
       </div>
 
       {isOpen && (
-        <ul className="absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto border border-gray-200 bg-white rounded-lg shadow-xl z-[1100]">
+        <ul className="absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto border border-gray-200 bg-white rounded-lg shadow-xl z-[400]">
           {noResults ? (
             <li className="px-4 py-3 text-gray-500 text-sm">No locations found</li>
           ) : (

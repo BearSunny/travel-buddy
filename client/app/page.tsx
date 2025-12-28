@@ -1,8 +1,8 @@
 import { auth0 } from "@/lib/auth0";
 import LandingPage from "./pages/LandingPage";
-import HomePage from "./pages/HomePage";
 import { redirect, RedirectType } from "next/navigation";
 import { CollaborationProvider } from "@/context/CollaborationContext";
+import HomePage from "./pages/HomePage";
 
 export default async function Home() {
   const session = await auth0.getSession();
@@ -11,8 +11,6 @@ export default async function Home() {
     redirect("/auth/login", RedirectType.push);
   } else
     return (
-      // <CollaborationProvider>
         <HomePage />
-      // </CollaborationProvider>
     ); // Authorized
 }
