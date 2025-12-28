@@ -47,11 +47,11 @@ export default function PlanInfo({ trip, onBack, onTripUpdate }: PlanInfoProps) 
   const { totalDays, plannedDays, progressPercent } = calculateTripStats();
 
   // Determine progress bar color based on completion
-  const getProgressColor = () => {
-    if (progressPercent >= 70) return "bg-green-500";
-    if (progressPercent >= 30) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+  // const getProgressColor = () => {
+  //   if (progressPercent >= 70) return "bg-green-500";
+  //   if (progressPercent >= 30) return "bg-yellow-500";
+  //   return "bg-red-500";
+  // };
   const { tripId, userId, users, isConnected, generateShareLink, joinTripRoom, leaveRoom } =
     useCollaborationContext();
   const { user } = useDbUser();
@@ -343,7 +343,7 @@ export default function PlanInfo({ trip, onBack, onTripUpdate }: PlanInfoProps) 
         <span className="text-[11px] font-medium text-gray-500">
           {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
         </span>
-        <div className="flex flex-col items-end w-32">
+        {/* <div className="flex flex-col items-end w-32">
           <div className="text-[10px] font-bold text-gray-900 mb-1">
             {plannedDays}/{totalDays} <span className="font-normal text-gray-500">Days planned</span>
           </div>
@@ -353,7 +353,7 @@ export default function PlanInfo({ trip, onBack, onTripUpdate }: PlanInfoProps) 
               style={{ width: `${progressPercent}%` }}
             ></div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Connection Status - Only show for non-completed trips */}

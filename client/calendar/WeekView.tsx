@@ -17,8 +17,6 @@ import { useTripContext } from '@/context/TripContext';
 import { useEvents } from '@/hooks/useTripEvents';
 import EventCard from '@/components/SideBar/events/EventCard';
 
-// const imgSearch = "https://www.figma.com/api/mcp/asset/4cb6dfdd-eddf-4be7-bdb3-e224ea1db92a";
-
 type SlotProps = {
   className?: string;
   type?: "blank";
@@ -364,7 +362,7 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
         {/* Placeholder for alignment */}
         <div className="bg-white h-[20px] shrink-0 w-[15px] border-gray-100 border-l h-full" data-node-id="I206:1988;1:1368" />
       </div>
-      <div className="flex-[1_0_0] min-h-px min-w-px overflow-x-clip overflow-y-auto relative shrink-0 w-full" data-name="CalendarGrid" data-node-id="206:1989">
+      <div className="flex relative shrink-0 w-full h-full content-stretch overflow-y-scroll" data-name="CalendarGrid" data-node-id="206:1989">
         <Grid className="absolute content-stretch flex h-[1500px] items-start left-0 right-0 top-0" />
         {/* Event Card */}
         {days.map((day) => {
