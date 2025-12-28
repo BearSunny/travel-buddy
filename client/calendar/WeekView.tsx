@@ -363,7 +363,7 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
         <div className="bg-white h-[20px] shrink-0 w-[15px] border-gray-100 border-l h-full" data-node-id="I206:1988;1:1368" />
       </div>
       <div className="flex relative shrink-0 w-full h-full content-stretch overflow-y-scroll" data-name="CalendarGrid" data-node-id="206:1989">
-        <Grid className="absolute content-stretch flex h-[1500px] items-start left-0 right-0 top-0" />
+        <Grid className="absolute content-stretch flex h-[1500px] items-start left-0 right-0 top-0 pr-[15px]" />
         {/* Event Card */}
         {days.map((day) => {
           const dateKey = format(day, 'yyyy-MM-dd');

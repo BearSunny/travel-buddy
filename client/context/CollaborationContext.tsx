@@ -70,7 +70,7 @@ export function CollaborationProvider({ children }: { children: React.ReactNode 
       console.warn('[CollaborationContext] No tripId to share');
       return '';
     }
-    const shareUrl = `${window.location.origin}?trip=${tripId}`;
+    const shareUrl = `${window.location.origin}/plans?trip=${tripId}`;
     console.log(`[CollaborationContext] Generated share link: ${shareUrl}`);
     return shareUrl;
   }, [tripId]);

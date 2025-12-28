@@ -93,7 +93,6 @@ export default function ObjectView() {
     useState<GeocodedLocation | null>(null);
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
-    console.log("To be sorted events:", events)
     const sorted = [...events].sort(
       (a, b) =>
         new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
@@ -107,8 +106,6 @@ export default function ObjectView() {
       const dateKey = !isNaN(vnDate.getTime())
         ? toISOStringVietnam(vnDate).split("T")[0]
         : "Unscheduled";
-
-        console.log(vnDate.toISOString(), "Waaaaa: ", dateKey)
 
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(event);
