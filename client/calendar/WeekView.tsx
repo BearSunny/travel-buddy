@@ -287,7 +287,7 @@ export default function WeekView( { currentDate, onDateChange }: WeekViewProps )
   }
 
   return (
-    <div className="content-stretch flex flex-col items-center justify-start pl-px pr-0 py-0 relative h-[420px] pt-2" data-name="WeekView" data-node-id="206:1986">
+    <div className="content-stretch flex flex-col items-center justify-start pl-px pr-0 py-0 relative h-full pt-2" data-name="WeekView" data-node-id="206:1986">
       {/* --- Header: Controls & Date Range --- */}
       <div className="bg-white border-[rgba(218,220,224,0.6)] border-b border-l-0 border-r-0 border-solid border-t content-stretch flex items-center justify-between relative shrink-0 w-full p-2" data-name="Title" data-node-id="206:1987">
         <div className="content-stretch flex gap-[8px] items-center relative shrink-0" data-name="Left Content" data-node-id="I206:1987;1:785">

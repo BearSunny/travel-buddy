@@ -232,20 +232,13 @@ export default function Map({ events = [] }: MapProps) {
         })}
 
         <ZoomControl position="bottomright" />
-        <div className="sticky top-4 left-4 z-[500] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
+        {/* <div className="sticky top-4 left-4 z-[500] w-[calc(100%-2rem)] md:w-auto pointer-events-none md:pointer-events-auto">
           <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
-            
-            {/* The Search Bar (Grows on desktop) */}
             <div className="pointer-events-auto w-full md:w-80">
               <LeafletGeocoder />
             </div>
-
-            {/* The Coffee Button (Fixed width on desktop, full width on mobile) */}
-            {/* <div className="pointer-events-auto w-full md:w-auto"> */}
-              {/* <CoffeeFinder onToast={(msg) => setShowToast(msg)} /> */}
-            {/* </div> */}
           </div>
-        </div>
+        </div> */}
       </MapContainer>
     </div>
   );

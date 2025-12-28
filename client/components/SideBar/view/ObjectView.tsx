@@ -339,7 +339,7 @@ export default function ObjectView() {
 
       {/* Add New Event Section - Hide for completed trips */}
       {!isTripCompleted ? (
-        <div className="pt-2 h-40 mb-10 bg-white bottom-30 border-t border-gray-100">
+        <div className="pt-2 h-40 mb-20 bg-white bottom-30 border-t border-gray-100">
           <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
             Add New Event
           </h3>
@@ -408,7 +408,7 @@ export default function ObjectView() {
               <div className="flex items-center gap-1">
                 <input
                   type="time"
-                  className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
+                  className="bg-transparent text-[13px] w-17 text-center focus:outline-none placeholder-gray-400"
                   value={newEvent.startTime}
                   onChange={(e) =>
                     handleInputChange("startTime", e.target.value)
@@ -426,7 +426,7 @@ export default function ObjectView() {
                 </svg>
                 <input
                   type="time"
-                  className="bg-transparent text-[10px] w-12 text-center focus:outline-none placeholder-gray-400"
+                  className="bg-transparent text-[13px] w-17 text-center focus:outline-none placeholder-gray-400"
                   value={newEvent.endTime}
                   onChange={(e) => handleInputChange("endTime", e.target.value)}
                 />
@@ -439,7 +439,7 @@ export default function ObjectView() {
                 <input
                   type="text"
                   placeholder="Cost"
-                  className="bg-transparent text-[10px] w-full focus:outline-none placeholder-gray-400"
+                  className="bg-transparent text-[13px] w-full focus:outline-none placeholder-gray-400"
                   value={newEvent.cost}
                   onChange={(e) => handleInputChange("cost", e.target.value)}
                 />
